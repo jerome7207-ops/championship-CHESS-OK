@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 Chess Championship</title>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Orbitron:wght@700;900&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a12;--bg2:#111122;--bg3:#1a1a30;--gold:#ffd700;--gold2:#d4a017;--red:#e74c3c;--green:#2ecc71;--blue:#3498db;--text:#e8e8f0;--muted:#777799;--border:#2a2a44;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Crimson Pro',Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.scr{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;}
+.fi{animation:fi .35s ease;}@keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;}}
+.crown{font-size:100px;margin-bottom:15px;filter:drop-shadow(0 0 40px rgba(255,215,0,0.4));}
+.mt{font-family:'Orbitron',sans-serif;font-size:56px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ff8c00,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px;margin-bottom:8px;}
+.stt{font-family:'Russo One',sans-serif;font-size:24px;color:var(--muted);letter-spacing:10px;text-transform:uppercase;margin-bottom:60px;}
+.btn{font-family:'Orbitron',sans-serif;font-weight:700;padding:16px 50px;border:none;border-radius:10px;cursor:pointer;letter-spacing:3px;transition:all .2s;font-size:18px;}
+.btn:hover{transform:translateY(-3px);}
+.btn-g{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;box-shadow:0 0 40px rgba(255,215,0,0.2);}
+.btn-r{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;box-shadow:0 0 40px rgba(231,76,60,0.2);}
+.btn-b{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;}
+.btn-d{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid var(--border);}
+.btn-gr{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;}
+.btn-sm{padding:10px 22px;font-size:14px;letter-spacing:1px;}
+.tg{margin-top:35px;color:var(--muted);font-size:16px;max-width:500px;line-height:1.7;}
+.reg-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:30px 35px;max-width:440px;width:100%;text-align:left;margin-top:20px;}
+.reg-box h2{font-family:'Orbitron',sans-serif;font-size:22px;color:var(--gold);margin-bottom:20px;text-align:center;}
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;font-family:'Russo One';}
+.fg input,.fg select{width:100%;padding:12px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:15px;outline:none;}
+.fg input:focus,.fg select:focus{border-color:var(--gold);}
+.ptag{font-family:'Orbitron',sans-serif;font-size:22px;color:var(--gold);letter-spacing:4px;text-align:center;padding:12px;background:rgba(255,215,0,.06);border:2px dashed var(--gold2);border-radius:10px;margin:10px 0 15px;}
+.ptag-sm{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--gold2);letter-spacing:2px;}
+/* Ladder */
+.lad{min-height:100vh;padding:30px 20px;max-width:750px;margin:0 auto;}
+.lt{font-family:'Orbitron',sans-serif;font-size:32px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:5px;}
+.lsb{color:var(--muted);font-size:15px;text-align:center;margin-bottom:20px;}
+.prb{text-align:center;margin-bottom:20px;padding:14px;background:var(--bg2);border-radius:10px;border:1px solid var(--border);}
+.pbar{height:8px;background:var(--bg3);border-radius:4px;margin-top:10px;overflow:hidden;}
+.pfill{height:100%;background:linear-gradient(90deg,var(--gold),#ff8c00);border-radius:4px;transition:width .5s;}
+.oc{display:flex;align-items:center;padding:18px 22px;margin-bottom:12px;background:var(--bg2);border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;position:relative;}
+.oc.u:hover{border-color:var(--gold);transform:translateX(6px);box-shadow:0 0 25px rgba(255,215,0,0.12);}
+.oc.l{opacity:.35;cursor:not-allowed;}.oc.d{border-color:var(--green);opacity:.65;}
+.oc.d::after{content:'\2713 DEFEATED';position:absolute;right:18px;font-size:13px;color:var(--green);font-weight:600;font-family:'Russo One';}
+.oc.cur{border-color:var(--gold);animation:gl 2s infinite;}
+@keyframes gl{0%,100%{box-shadow:0 0 5px rgba(255,215,0,0.2);}50%{box-shadow:0 0 25px rgba(255,215,0,0.35);}}
+.ork{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;margin-right:16px;}
+.oem{font-size:38px;margin-right:16px;}.oinf{flex:1;}
+.onm{font-family:'Russo One',sans-serif;font-size:18px;margin-bottom:3px;}
+.ost{font-size:13px;color:var(--muted);}.oel{flex-shrink:0;text-align:right;}
+.oel .rnk{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;}.oel .rkt{font-size:11px;color:var(--muted);}
+.olrn{font-size:11px;color:var(--red);font-family:'Russo One';margin-top:2px;}
+/* Stat badges */
+.sbg{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);margin:4px;}
+.sbg .sbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Russo One';}
+.sbg .sbv{font-size:18px;font-weight:700;font-family:'Orbitron';}
+.sbg .sbs{font-size:14px;}
+/* Game */
+.gs{display:flex;padding:20px;gap:20px;justify-content:center;align-items:flex-start;flex-wrap:wrap;min-height:100vh;}
+.gl{display:flex;flex-direction:column;align-items:center;}
+.gh{display:flex;align-items:center;gap:12px;margin-bottom:10px;width:100%;}
+.gtl{font-family:'Russo One',sans-serif;font-size:18px;flex:1;text-align:center;}
+.bd{display:grid;grid-template-columns:repeat(8,80px);border:4px solid #3a3a55;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,0.7);}
+.sq{width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:56px;cursor:pointer;user-select:none;transition:background .12s;position:relative;}
+.sl{background:#e8d0a8;}.sd{background:#b08050;}.ss{background:#f6d32d!important;}
+.sv{background:#66cc66!important;}.sv::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(0,150,0,.45);}
+.sla{background:#ddc87a!important;}.sld{background:#c4a44a!important;}
+.pw{color:#fff;text-shadow:2px 2px 5px rgba(0,0,0,.6),0 0 10px rgba(255,255,255,.15);}
+.ppb{color:#1a1a2e;text-shadow:1px 1px 3px rgba(0,0,0,.2);}
+.gst{margin-top:12px;padding:12px 30px;border-radius:8px;font-weight:600;font-size:18px;text-align:center;font-family:'Russo One';}
+.stp{background:linear-gradient(135deg,#ecf0f1,#bdc3c7);color:#1a1a2e;}
+.sta{background:linear-gradient(135deg,#2c3e50,#1a252f);color:#ccc;}
+.ste{background:linear-gradient(135deg,var(--gold),#ff8c00);color:#000;}
+.gc{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+/* Chat */
+.gr{width:340px;height:682px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;}
+.chdr{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);}
+.cem{font-size:40px;}.cnm{font-family:'Russo One',sans-serif;font-size:16px;}.cel{font-size:12px;color:var(--gold2);}
+.cmsg{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.mg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:15px;line-height:1.5;animation:mi .25s ease;}
+@keyframes mi{from{opacity:0;transform:translateY(8px);}to{opacity:1;}}
+.mo{align-self:flex-start;background:var(--bg3);color:var(--text);border-bottom-left-radius:4px;}
+.mp{align-self:flex-end;background:#2a4a6a;color:#dde;border-bottom-right-radius:4px;}
+.msy{align-self:center;background:rgba(255,215,0,.1);color:var(--gold2);font-size:13px;border-radius:20px;padding:5px 14px;}
+.mmv{align-self:center;font-size:12px;color:var(--muted);padding:2px 8px;}
+.cina{padding:10px;border-top:1px solid var(--border);display:flex;gap:8px;background:rgba(0,0,0,.15);}
+.cin{flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;outline:none;}
+.cin:focus{border-color:var(--gold);}.cin::placeholder{color:#555;}
+.csnd{padding:10px 18px;background:var(--gold);color:#000;border:none;border-radius:8px;cursor:pointer;font-family:'Russo One',sans-serif;font-size:13px;}
+/* Results */
+.ri{font-size:90px;margin-bottom:20px;}.rtl{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;margin-bottom:15px;}
+.rw{color:var(--gold);}.rlc{color:var(--red);}
+.rmg{font-size:17px;color:var(--muted);margin-bottom:30px;max-width:450px;line-height:1.7;}
+.chbs{font-size:130px;margin-bottom:25px;animation:bg 2s infinite;}
+@keyframes bg{0%,100%{filter:drop-shadow(0 0 20px rgba(255,215,0,.5));}50%{filter:drop-shadow(0 0 60px rgba(255,215,0,.9));}}
+.chtl{font-family:'Orbitron',sans-serif;font-size:46px;font-weight:900;background:linear-gradient(135deg,#ffd700,#fff,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;}
+.cf{position:fixed;top:-10px;animation:cfa linear forwards;}@keyframes cfa{to{top:110vh;transform:rotate(720deg);}}
+/* Leaderboard */
+.lbd{max-width:700px;width:100%;margin-top:20px;}
+.tabs{display:flex;gap:4px;margin-bottom:15px;justify-content:center;flex-wrap:wrap;}
+.tab{padding:10px 24px;border-radius:8px 8px 0 0;cursor:pointer;font-family:'Russo One';font-size:14px;background:var(--bg2);border:1px solid var(--border);border-bottom:none;color:var(--muted);transition:all .2s;}
+.tab.act{background:var(--bg3);color:var(--gold);border-color:var(--gold);}
+.lbt{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.lbt th{font-family:'Russo One';font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;padding:14px 16px;text-align:left;background:rgba(0,0,0,.3);}
+.lbt td{padding:12px 16px;border-top:1px solid var(--border);font-size:15px;}
+.lbt tr:hover td{background:rgba(255,215,0,.03);}
+.lbt .rk{font-family:'Orbitron';font-weight:700;color:var(--gold);width:60px;}
+.lbt .sc{font-family:'Orbitron';color:var(--green);}
+.no-data{padding:40px;text-align:center;color:var(--muted);font-style:italic;}
+.rec{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.2);font-size:12px;color:var(--green);font-family:'Russo One';margin-top:4px;}
+.bk{display:inline-block;padding:10px 22px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-family:inherit;font-size:14px;margin:8px 4px;transition:all .2s;}
+.bk:hover{border-color:var(--gold);color:var(--gold);}
+.lrn-badge{display:inline-block;background:rgba(231,76,60,.15);color:var(--red);font-size:11px;padding:2px 8px;border-radius:10px;font-family:'Russo One';margin-left:8px;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ========== CHESS ENGINE ==========
+const SYM={K:'\u2654',Q:'\u2655',R:'\u2656',B:'\u2657',N:'\u2658',P:'\u2659',k:'\u265A',q:'\u265B',r:'\u265C',b:'\u265D',n:'\u265E',p:'\u265F'};
+const VAL={p:100,n:320,b:330,r:500,q:900,k:20000};
+const INIT=[['r','n','b','q','k','b','n','r'],['p','p','p','p','p','p','p','p'],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],['P','P','P','P','P','P','P','P'],['R','N','B','Q','K','B','N','R']];
+const PT=[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,50,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,5,10,10,-20,-20,10,10,5,0,0,0,0,0,0,0,0];
+const NT=[-50,-40,-30,-30,-30,-30,-40,-50,-40,-20,0,0,0,0,-20,-40,-30,0,10,15,15,10,0,-30,-30,5,15,20,20,15,5,-30,-30,0,15,20,20,15,0,-30,-30,5,10,15,15,10,5,-30,-40,-20,0,5,5,0,-20,-40,-50,-40,-30,-30,-30,-30,-40,-50];
+const BT=[-20,-10,-10,-10,-10,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,10,10,5,0,-10,-10,5,5,10,10,5,5,-10,-10,0,10,10,10,10,0,-10,-10,10,10,10,10,10,10,-10,-10,5,0,0,0,0,5,-10,-20,-10,-10,-10,-10,-10,-10,-20];
+const KT=[-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10,20,20,0,0,0,0,20,20,20,30,10,0,0,10,30,20];
+function isW(p){return p&&p===p.toUpperCase();}
+function isP(p,pl){return p?(pl==='white'?p===p.toUpperCase():p===p.toLowerCase()):false;}
+function gM(b,r,c,p){const m=[],w=isW(p);const a=(r2,c2)=>{if(r2<0||r2>7||c2<0||c2>7)return!1;const t=b[r2][c2];if(!t||(w?t===t.toLowerCase():t===t.toUpperCase())){m.push([r2,c2]);return!t;}return!1;};const t=p.toLowerCase();if(t==='p'){const d=w?-1:1,s=w?6:1;if(b[r+d]?.[c]===null){m.push([r+d,c]);if(r===s&&b[r+2*d]?.[c]===null)m.push([r+2*d,c]);}[-1,1].forEach(dc=>{const x=b[r+d]?.[c+dc];if(x&&(w?x===x.toLowerCase():x===x.toUpperCase()))m.push([r+d,c+dc]);});}else if(t==='n'){[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>a(r+dr,c+dc));}else if(t==='b'){for(let i=1;i<8;i++)if(!a(r+i,c+i))break;for(let i=1;i<8;i++)if(!a(r+i,c-i))break;for(let i=1;i<8;i++)if(!a(r-i,c+i))break;for(let i=1;i<8;i++)if(!a(r-i,c-i))break;}else if(t==='r'){for(let i=1;i<8;i++)if(!a(r+i,c))break;for(let i=1;i<8;i++)if(!a(r-i,c))break;for(let i=1;i<8;i++)if(!a(r,c+i))break;for(let i=1;i<8;i++)if(!a(r,c-i))break;}else if(t==='q'){for(let i=1;i<8;i++)if(!a(r+i,c))break;for(let i=1;i<8;i++)if(!a(r-i,c))break;for(let i=1;i<8;i++)if(!a(r,c+i))break;for(let i=1;i<8;i++)if(!a(r,c-i))break;for(let i=1;i<8;i++)if(!a(r+i,c+i))break;for(let i=1;i<8;i++)if(!a(r+i,c-i))break;for(let i=1;i<8;i++)if(!a(r-i,c+i))break;for(let i=1;i<8;i++)if(!a(r-i,c-i))break;}else if(t==='k'){[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc])=>a(r+dr,c+dc));}return m;}
+function aM(b,pl){const m=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=b[r][c];if(p&&isP(p,pl))gM(b,r,c,p).forEach(([tr,tc])=>m.push({f:[r,c],t:[tr,tc],p}));}return m;}
+function ap(b,f,t){const n=b.map(r=>[...r]);let p=n[f[0]][f[1]];if(p?.toLowerCase()==='p'&&(t[0]===0||t[0]===7))p=isW(p)?'Q':'q';n[t[0]][t[1]]=p;n[f[0]][f[1]]=null;return n;}
+function ev(b,w){let s=0;for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=b[r][c];if(!p)continue;const wh=isW(p),sg=wh?1:-1,t=p.toLowerCase();let v=VAL[t]||0;if(w.pc&&w.pc[t])v*=w.pc[t];s+=sg*v*(w.mat||1);const tr=wh?r:7-r,idx=tr*8+c;if(t==='p')s+=sg*PT[idx]*(w.cen||1);else if(t==='n')s+=sg*NT[idx]*(w.cen||1);else if(t==='b')s+=sg*BT[idx]*(w.cen||1);else if(t==='k')s+=sg*KT[idx]*(w.ks||1);if((r===3||r===4)&&(c===3||c===4))s+=sg*10*(w.cen||1);if(t==='n'||t==='b'){const h=wh?7:0;if(r!==h)s+=sg*15*(w.dev||1);}}return s;}
+function mm(b,d,a,bt,mx,w){if(d===0)return ev(b,w);const pl=mx?'white':'black',ms=aM(b,pl);if(!ms.length)return mx?-Infinity:Infinity;if(mx){let best=-Infinity;for(const m of ms){const v=mm(ap(b,m.f,m.t),d-1,a,bt,!1,w);best=Math.max(best,v);a=Math.max(a,v);if(bt<=a)break;}return best;}else{let best=Infinity;for(const m of ms){const v=mm(ap(b,m.f,m.t),d-1,a,bt,!0,w);best=Math.min(best,v);bt=Math.min(bt,v);if(bt<=a)break;}return best;}}
+function aiMv(b,depth,rng,w){if(Math.random()<rng){const ms=aM(b,'black');return ms.length?ms[Math.floor(Math.random()*ms.length)]:null;}const ms=aM(b,'black');if(!ms.length)return null;let bm=null,bs=Infinity;for(const m of ms){const s=mm(ap(b,m.f,m.t),depth-1,-Infinity,Infinity,!0,w);if(s<bs){bs=s;bm=m;}}return bm||ms[0];}
+
+// ========== TERMINOLOGY ==========
+const RANKS=[
+{tier:'\u265F Pawn',cls:'Beginner',color:'#7bed9f'},
+{tier:'\u265F Pawn II',cls:'Novice',color:'#70a1ff'},
+{tier:'\u265E Knight',cls:'Developing',color:'#a4b0be'},
+{tier:'\u265D Bishop',cls:'Skilled',color:'#ff6b6b'},
+{tier:'\u265C Rook',cls:'Advanced',color:'#ffa502'},
+{tier:'\u265C Rook II',cls:'Expert',color:'#c56cf0'},
+{tier:'\u265B Queen',cls:'Master',color:'#1e90ff'},
+{tier:'\u265B Queen II',cls:'Elite',color:'#e74c3c'},
+{tier:'\u265A King',cls:'Grandmaster',color:'#95a5a6'},
+{tier:'\uD83C\uDFC6 Legend',cls:'Champion',color:'#ffd700'}
+];
+function foresight(d){return '\u2605'.repeat(d)+'\u2606'.repeat(4-d);}
+function foresightLabel(d){return['Blind','Novice','Skilled','Sharp','Brilliant'][d]||'Novice';}
+function precisionLabel(rng){const acc=1-rng;if(acc>=1)return'Perfect';if(acc>=.98)return'Ruthless';if(acc>=.97)return'Deadly';if(acc>=.96)return'Surgical';if(acc>=.95)return'Focused';if(acc>=.92)return'Sharp';if(acc>=.88)return'Steady';if(acc>=.75)return'Loose';return'Wild';}
+function precisionColor(rng){const acc=1-rng;if(acc>=.97)return'#e74c3c';if(acc>=.92)return'#ffa502';if(acc>=.75)return'#ffd700';return'#7bed9f';}
+
+// ========== OPPONENTS ==========
+const OPP=[
+{id:0,name:"Patzer Pete",emoji:"\uD83E\uDD13",color:"#7bed9f",title:"The Beginner",elo:400,depth:1,rng:.35,w:{mat:1,cen:.3,dev:.2,ks:.1,pc:{}},scout:"Pete barely knows the rules. Moves randomly half the time. Develop your pieces and pick off his blunders.",chat:{intro:"Oh hi! I just learned chess last week!",strategy:"I try to move pieces forward?",opening:"I don't know any openings!",losing:["Oh no...","I'm in trouble..."],winning:["Am I winning?!"],capture:["Hey! My piece!","You can DO that?!"],moved:["I think this is good!","Here goes nothing!","Is this okay?"],taunt:["I'm trying!"],chess_q:"I'm still learning!",piece_q:"It seemed good!",who:"I'm Pete! Still learning the moves!",default:["Good question!","I'm not sure.","Happy to play!"],learned:"Wait... you did that last time too! I remember now!"}},
+{id:1,name:"Scholar Sam",emoji:"\uD83D\uDCDA",color:"#70a1ff",title:"The Bookworm",elo:600,depth:2,rng:.25,w:{mat:1,cen:.8,dev:.5,ks:.3,pc:{}},scout:"Memorized openings but crumbles off-book. Surprise him with unusual moves early.",chat:{intro:"I've studied every opening!",strategy:"Theory is everything!",opening:"Italian Game. Ruy Lopez.",losing:["Not in the book!","Chapter 7..."],winning:["Textbook!"],capture:["As the books predicted!"],moved:["According to analysis...","The book says..."],taunt:["300 variations memorized!"],chess_q:"Let me consult my books...",piece_q:"Main line Giuoco Piano.",who:"I've read every chess book.",default:["Fascinating.","In my books..."],learned:"I've been studying our previous games. I found the counter in chapter 12!"}},
+{id:2,name:"Fortress Frank",emoji:"\uD83C\uDFF0",color:"#a4b0be",title:"The Wall",elo:800,depth:2,rng:.12,w:{mat:1.2,cen:.6,dev:.5,ks:2.5,pc:{}},scout:"Ultra-defensive. Never attacks first. Be patient, open lines, and force exchanges.",chat:{intro:"My walls are impenetrable.",strategy:"Defense wins championships.",opening:"Solid setups. Fortress.",losing:["A crack..."],winning:["The fortress holds."],capture:["Wall claims another."],moved:["Reinforcing.","Solid.","Nothing gets through."],taunt:["Try to break through."],chess_q:"King safety is everything.",piece_q:"More solid structure.",who:"Fortress Frank. Unbreakable defense.",default:["Patience.","Solid."],learned:"I've reinforced the weaknesses you exploited last time. The wall is stronger now."}},
+{id:3,name:"Gambit Gina",emoji:"\uD83D\uDD25",color:"#ff6b6b",title:"The Berserker",elo:1000,depth:2,rng:.08,w:{mat:.7,cen:1.8,dev:1.5,ks:.3,pc:{}},scout:"Sacrifices recklessly for attacks. Stay calm, accept material, and defend accurately.",chat:{intro:"SACRIFICES! ATTACKS! CHECKMATE!",strategy:"ATTACK ATTACK ATTACK!",opening:"King's Gambit! Evans Gambit!",losing:["The fire is dying..."],winning:["BURN BABY BURN!"],capture:["BLOOD!","Your pieces are FUEL!"],moved:["CHARGE!!!","Take THAT!","FORWARD!"],taunt:["SCARED?!","COME AT ME!"],chess_q:"Only strategy is ATTACK!",piece_q:"Most AGGRESSIVE option!",who:"I'd rather lose spectacularly!",default:["Let's FIGHT!"],learned:"I know where you hide your king now. The fire will find you FASTER!"}},
+{id:4,name:"Knight Rider Nick",emoji:"\uD83D\uDC34",color:"#ffa502",title:"The Tactician",elo:1200,depth:2,rng:.05,w:{mat:1,cen:1.2,dev:1,ks:.8,pc:{n:1.6}},scout:"Overvalues knights. Trade them early to neutralize his biggest weapon.",chat:{intro:"The knight leaps where others crawl.",strategy:"Perfect knight placement wins games.",opening:"Knights first. Always.",losing:["Without my knights..."],winning:["Fork after fork!"],capture:["L-shaped assassin!"],moved:["Knight leaps!","Fork potential...","Outpost!"],taunt:["See the fork coming?"],chess_q:"Knights can jump over everything.",piece_q:"Knight outpost controls the board.",who:"The knight is the most dangerous piece.",default:["Consider the knight."],learned:"I've mapped your king's escape routes. My knights know exactly where to land now."}},
+{id:5,name:"Bishop Blitz Betty",emoji:"\u26EA",color:"#c56cf0",title:"The Sniper",elo:1400,depth:3,rng:.04,w:{mat:1,cen:1,dev:1,ks:1,pc:{b:1.5}},scout:"Bishop pair dominates open diagonals. Block with pawns and trade bishops early.",chat:{intro:"The diagonals are mine.",strategy:"Unleash the bishop pair.",opening:"Catalan. Fianchetto both.",losing:["Diagonals blocked..."],winning:["Bishop dominance!"],capture:["Sniped from across the board!"],moved:["Opening diagonal.","Bishops aligning."],taunt:["My bishops reach everywhere."],chess_q:"The bishop pair is devastating.",piece_q:"Long diagonal control.",who:"Betty. Fischer believed in the bishop pair. So do I.",default:["The bishops speak."],learned:"I've analyzed your pawn structure from last time. My diagonals are already aimed at your weaknesses."}},
+{id:6,name:"Rook Roller Rex",emoji:"\uD83D\uDDFC",color:"#1e90ff",title:"The Grinder",elo:1600,depth:3,rng:.03,w:{mat:1.1,cen:1,dev:.8,ks:1,pc:{r:1.4}},scout:"Endgame specialist. Avoid trading into simplified positions.",chat:{intro:"The endgame is where truth lives.",strategy:"Trade down, activate rooks, grind.",opening:"Solid openings for favorable endgames.",losing:["Still too many pieces..."],winning:["Rooks on the seventh rank."],capture:["Simplifying.","One step closer."],moved:["Opening the file.","Rooks are coming.","Grinding."],taunt:["You'll tire eventually."],chess_q:"Endgame technique separates players.",piece_q:"Connected rooks on open files.",who:"Rex. Patient. Relentless. Inevitable.",default:["Patience wins.","The rooks decide."],learned:"I know your endgame tendencies now. You won't escape the grind this time."}},
+{id:7,name:"Queen's Fury Quinn",emoji:"\uD83D\uDC51",color:"#e74c3c",title:"The Hunter",elo:1800,depth:3,rng:.02,w:{mat:1,cen:1.3,dev:1.2,ks:.6,pc:{q:1.3}},scout:"Deploys queen aggressively early. Attack her queen directly to win tempos.",chat:{intro:"My queen hunts kings. Better start running.",strategy:"Queen early and relentlessly.",opening:"Queen's out early. Books are wrong about that.",losing:["The queen is trapped..."],winning:["My queen found your king."],capture:["The queen feasts!"],moved:["Queen advances.","Nowhere to hide."],taunt:["Feel her approaching?","Run."],chess_q:"The queen is worth nine points of fury.",piece_q:"Maximum pressure on your king.",who:"Quinn. Fear the queen.",default:["She's hunting."],learned:"I've studied how you defend against her. My queen already knows the path to your king."}},
+{id:8,name:"Iron Ivan",emoji:"\uD83E\uDDBE",color:"#95a5a6",title:"The Machine",elo:2000,depth:3,rng:0,w:{mat:1,cen:1.1,dev:1.1,ks:1.2,pc:{}},scout:"No weaknesses. Perfectly balanced play. Your only hope is creative complications.",chat:{intro:"No weaknesses. I calculate. I execute.",strategy:"Optimal evaluation at every position.",opening:"Highest evaluation move. Names are irrelevant.",losing:["Anomaly detected. Recalculating."],winning:["Outcome: inevitable."],capture:["Calculated and executed."],moved:["Optimal.","Precise.","Maximum efficiency."],taunt:["Emotion is a weakness I don't have."],chess_q:"Chess is pure mathematics.",piece_q:"The position required this move.",who:"Ivan. I don't have style. I have perfection.",default:["Processing.","Calculating."],learned:"Your patterns have been catalogued. Probability of repeating your previous victory: 12.3%."}},
+{id:9,name:"The Champion",emoji:"\uD83C\uDFC6",color:"#ffd700",title:"World Chess Champion",elo:2200,depth:3,rng:0,w:{mat:1.1,cen:1.3,dev:1.3,ks:1.4,pc:{}},scout:"Master of everything. Adapts to any style. The final test. Bring everything you've learned.",chat:{intro:"You've come far. But the title stays with me.",strategy:"I adapt to whatever you bring.",opening:"All of them. Whichever you fear most.",losing:["...Impossible."],winning:["The champion remains the champion."],capture:["Precisely as I planned."],moved:["A champion's move.","Every move serves a purpose."],taunt:["I've beaten every challenger before you."],chess_q:"True mastery means all strategies are one.",piece_q:"Material, space, time, safety. All at once.",who:"The Champion. The title doesn't change hands.",default:["The board speaks.","Make your move."],learned:"I've studied every game you played to get here. Every opening, every pattern, every weakness. Good luck."}}
+];
+
+// ========== LEARNING ENGINE ==========
+function getLearn(id){try{return JSON.parse(localStorage.getItem('cch-learn-'+id))||newLearn();}catch{return newLearn();}}
+function saveLearn(id,d){try{localStorage.setItem('cch-learn-'+id,JSON.stringify(d));}catch{}}
+function newLearn(){return{gp:0,gw:0,tb:0,active:false,pat:{op:{},pp:{P:0,N:0,B:0,R:0,Q:0,K:0},az:{k:0,q:0,c:0}}};}
+function trackMove(f,t,piece){if(!S.tracker)return;const pt=piece.toUpperCase();S.tracker.pp[pt]=(S.tracker.pp[pt]||0)+1;const mn=String.fromCharCode(97+f[1])+(8-f[0])+String.fromCharCode(97+t[1])+(8-t[0]);S.tracker.moves.push(mn);if(S.tracker.moves.length<=6)S.tracker.opening.push(mn);if(t[1]>=5)S.tracker.az.k++;else if(t[1]<=2)S.tracker.az.q++;else S.tracker.az.c++;}
+function finishLearn(oppId,won){const d=getLearn(oppId);d.gp++;if(won)d.gw++;const tk=S.tracker;if(tk){const opKey=tk.opening.join(',');d.pat.op[opKey]=(d.pat.op[opKey]||0)+1;for(const p in tk.pp)d.pat.pp[p]=(d.pat.pp[p]||0)+tk.pp[p];d.pat.az.k+=tk.az.k;d.pat.az.q+=tk.az.q;d.pat.az.c+=tk.az.c;}if(won&&!d.active){d.active=true;d.tb=1;}else if(won)d.tb++;saveLearn(oppId,d);}
+function getAdjusted(opp){const d=getLearn(opp.id);if(!d.active)return{depth:opp.depth,rng:opp.rng,w:{...opp.w,pc:{...opp.w.pc}}};const boost=Math.min(d.tb,2);const depth=Math.min(opp.depth+boost,4);const rng=Math.max(0,opp.rng-d.tb*0.05);const w={mat:opp.w.mat,cen:opp.w.cen,dev:opp.w.dev,ks:opp.w.ks,pc:{...opp.w.pc}};let maxP='P',maxV=0;for(const p in d.pat.pp)if(d.pat.pp[p]>maxV){maxV=d.pat.pp[p];maxP=p;}if(maxP!=='P'&&maxP!=='K')w.pc[maxP.toLowerCase()]=(w.pc[maxP.toLowerCase()]||1)*1.15;const az=d.pat.az;if(az.k>az.q&&az.k>az.c)w.ks=(w.ks||1)*1.2;return{depth,rng,w};}
+
+// ========== PLAYER TAG SYSTEM ==========
+const TAG_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function genTag(){let t='';for(let i=0;i<8;i++)t+=TAG_CHARS[Math.floor(Math.random()*TAG_CHARS.length)];return t.slice(0,4)+'-'+t.slice(4);}
+function getProfile(){try{return JSON.parse(localStorage.getItem('cch-profile'));}catch{return null;}}
+function saveProfile(p){localStorage.setItem('cch-profile',JSON.stringify(p));}
+function getStats(){try{return JSON.parse(localStorage.getItem('cch-stats'))||{attempts:{},totalMoves:0};}catch{return{attempts:{},totalMoves:0};}}
+function saveStats(s){localStorage.setItem('cch-stats',JSON.stringify(s));}
+function getBeaten(){try{return JSON.parse(localStorage.getItem('cchv5'))||[];}catch{return[];}}
+function saveBeaten(b){localStorage.setItem('cchv5',JSON.stringify(b));}
+function getBestMoves(id){try{return JSON.parse(localStorage.getItem('cch-best-'+id));}catch{return null;}}
+function saveBestMoves(id,m,c){const cur=getBestMoves(id);if(!cur||c<cur.count){localStorage.setItem('cch-best-'+id,JSON.stringify({moves:m,count:c}));return true;}return false;}
+
+const COUNTRIES=["United States","United Kingdom","Canada","Australia","Germany","France","India","Brazil","Japan","Mexico","Spain","Italy","Netherlands","South Korea","China","Russia","Sweden","Norway","Poland","Argentina","Colombia","South Africa","Nigeria","Kenya","Egypt","Turkey","Saudi Arabia","Philippines","Indonesia","Thailand","Vietnam","Other"];
+
+// ========== SUPABASE ==========
+const SUPA_URL='https://niqkhzwaysdmbxmaocwo.supabase.co';
+function getSupaKey(){return localStorage.getItem('cch-supa-key')||'';}
+function setSupaKey(k){localStorage.setItem('cch-supa-key',k);}
+async function supa(method,table,body,query){const key=getSupaKey();if(!key)return null;const url=SUPA_URL+'/rest/v1/'+table+(query||'');const opts={method,headers:{'Content-Type':'application/json','apikey':key,'Authorization':'Bearer '+key}};if(method==='POST')opts.headers['Prefer']='return=representation';if(body)opts.body=JSON.stringify(body);try{const r=await fetch(url,opts);if(!r.ok)return null;return await r.json();}catch{return null;}}
+
+async function submitScore(profile,stats){
+    const totalAttempts=Object.values(stats.attempts).reduce((a,b)=>a+b,0);
+    const score=stats.totalMoves+(totalAttempts-10)*50;
+    const r=await supa('POST','chess_leaderboard',{player_tag:profile.tag,player_name:profile.name,country:profile.country,state_region:profile.state,total_moves:stats.totalMoves,total_attempts:totalAttempts,opponents_beaten:10,score});
+    return r?{ok:true,score}:{ok:false,err:'Connection failed. Check API key in Settings.'};
+}
+async function submitGhost(profile,oppId,moves,count){
+    await supa('POST','chess_ghosts',{player_tag:profile.tag,player_name:profile.name,opponent_id:oppId,moves_json:JSON.stringify(moves),total_moves:count,country:profile.country||'',state_region:profile.state||''});
+}
+async function fetchLeaderboard(scope,profile){
+    let q='?select=*&order=score.asc&limit=50';
+    if(scope==='country')q+='&country=eq.'+encodeURIComponent(profile.country);
+    if(scope==='state')q+='&country=eq.'+encodeURIComponent(profile.country)+'&state_region=eq.'+encodeURIComponent(profile.state);
+    return await supa('GET','chess_leaderboard',null,q)||[];
+}
+async function fetchGhosts(oppId){return await supa('GET','chess_ghosts',null,'?opponent_id=eq.'+oppId+'&order=total_moves.asc&limit=20')||[];}
+
+// ========== STATE ==========
+let S={screen:'title',opp:0,beaten:getBeaten(),board:null,player:'white',sel:null,valid:[],log:[],status:'active',last:null,moves:0,msgs:[],tracker:null,stats:getStats(),lbTab:'world',ghostList:[]};
+const $=document.getElementById('app');
+
+// ========== CHAT ==========
+function getResp(o,msg){const m=msg.toLowerCase(),c=o.chat;if(m.match(/strateg|plan|approach/))return c.strategy;if(m.match(/opening|first move/))return c.opening;if(m.match(/who are you|your name/))return c.who;if(m.match(/why.*(move|that)|explain/))return c.piece_q;if(m.match(/chess|tip|advice|learn/))return c.chess_q;if(m.match(/scare|afraid|fear/)){const t=Array.isArray(c.taunt)?c.taunt:[c.taunt];return t[Math.floor(Math.random()*t.length)];}if(m.match(/hello|hi |hey/))return c.intro;if(m.match(/weak|flaw/))return"Figure it out yourself!";if(m.match(/learn|studied|remember|pattern/)){const d=getLearn(o.id);return d.active?c.learned:"I haven't learned your patterns yet. Beat me first!";}if(m.match(/rank|class|level/)){const rk=RANKS[o.id];return"I'm "+rk.tier+" class. "+rk.cls+" level.";}if(m.match(/record|best|ghost|fast/)){const b=getBestMoves(o.id);return b?"Your best win against me was "+b.count+" moves. Think you can beat that?":"You haven't beaten me yet!";}const d=Array.isArray(c.default)?c.default:[c.default];return d[Math.floor(Math.random()*d.length)];}
+function addMsg(t,tx){S.msgs.push({t,tx});rCh();}
+function addMM(p,f,t,cap,pl){const s=SYM[p]||'',fc=String.fromCharCode(97+f[1])+(8-f[0]),tc=String.fromCharCode(97+t[1])+(8-t[0]),cx=cap?' x '+SYM[cap]:'';addMsg('mmv',(pl==='white'?'You':OPP[S.opp].name)+': '+s+' '+fc+'\u2192'+tc+cx);}
+
+// ========== RENDER ==========
+function render(){switch(S.screen){case'title':rTitle();break;case'register':rReg();break;case'ladder':rLad();break;case'prematch':rPM();break;case'game':rGame();break;case'victory':rVic();break;case'defeat':rDef();break;case'champion':rChamp();break;case'leaderboard':rLB();break;case'settings':rSet();break;case'records':rRec();break;}}
+
+function rTitle(){
+    const prof=getProfile();
+    $.innerHTML=`<div class="scr fi" style="background:radial-gradient(ellipse at 50% 35%,rgba(255,215,0,.06) 0%,transparent 65%)">
+    <div class="crown">\u2654</div><div class="mt">V2 CHESS</div><div class="stt">CHAMPIONSHIP</div>
+    ${prof?`<div style="font-family:'Russo One';font-size:20px;color:var(--text);margin-bottom:3px">Welcome back, <span style="color:var(--gold)">${prof.name}</span></div><div class="ptag-sm" style="margin-bottom:15px">${prof.country}${prof.state?', '+prof.state:''}</div>`:''}
+    <button class="btn btn-g" style="font-size:22px;padding:20px 70px;letter-spacing:4px" onclick="goNext()">ENTER THE RING</button>
+    <div style="max-width:580px;margin-top:35px;text-align:center;line-height:1.8">
+    <div style="font-size:19px;color:var(--text);margin-bottom:12px">Fight your way through <strong style="color:var(--gold)">10 chess opponents</strong> to claim the Championship belt.</div>
+    <div style="font-size:15px;color:var(--muted);margin-bottom:22px">Every opponent has their own personality, their own strategy, and their own way of getting under your skin. It starts easy. It doesn't stay that way.</div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:22px">
+        <span style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:14px">\uD83E\uDD13 The Beginner</span>
+        <span style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:14px">\uD83C\uDFF0 The Wall</span>
+        <span style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:14px">\uD83D\uDD25 The Berserker</span>
+        <span style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:14px">\uD83D\uDC34 The Tactician</span>
+        <span style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:14px">\uD83D\uDC51 The Hunter</span>
+        <span style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:14px">\uD83E\uDDBE The Machine</span>
+        <span style="background:rgba(255,215,0,.08);border:1px solid var(--gold2);border-radius:20px;padding:6px 14px;font-size:14px;color:var(--gold)">\uD83C\uDFC6 The Champion</span>
+    </div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:12px 16px;font-size:15px;color:var(--muted);text-align:left;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 26px">
+        <span style="font-size:20px">\uD83C\uDFAF</span><span><strong style="color:var(--text)">Climb the Ladder</strong> \u2014 Beat one, unlock the next. Each opponent is tougher, smarter, and plays a completely different style. What worked on the last one won't work here.</span>
+        <span style="font-size:20px">\uD83E\uDDE0</span><span><strong style="color:var(--red)">They Learn From You</strong> \u2014 This is not normal chess AI. Beat an opponent and they study your game \u2014 your openings, your favorite pieces, where you attack. Come back for a rematch and they're ready for you.</span>
+        <span style="font-size:20px">\uD83D\uDCAC</span><span><strong style="color:var(--text)">They Talk Back</strong> \u2014 Every fighter has personality. They taunt you, comment on your moves, and respond when you chat with them mid-game. Ask for chess tips. Trash talk. They'll answer.</span>
+        <span style="font-size:20px">\uD83C\uDFC6</span><span><strong style="color:var(--text)">World Leaderboard</strong> \u2014 Finish the championship and submit your score. Fewer moves + fewer attempts = higher rank. Your name goes on the global, country, and state leaderboards for everyone to see.</span>
+    </div></div>
+    <div style="margin-top:30px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        <button class="bk" onclick="S.screen='leaderboard';render()">\uD83C\uDFC6 Leaderboard</button>
+        <button class="bk" onclick="S.screen='records';render()">\uD83C\uDFAC Records</button>
+        <button class="bk" onclick="S.screen='settings';render()">\u2699 Settings</button>
+    </div></div>`;
+}
+
+function rReg(){
+    const p=getProfile(),tag=p?.tag||genTag();
+    $.innerHTML=`<div class="scr fi">
+    <div style="font-size:60px;margin-bottom:10px">\uD83C\uDFC6</div>
+    <div style="font-family:'Orbitron';font-size:24px;color:var(--gold);margin-bottom:5px">ENTER THE CHAMPIONSHIP</div>
+    <div style="font-size:15px;color:var(--muted);margin-bottom:15px;max-width:400px;line-height:1.6">10 opponents are waiting. They'll learn your moves, study your style, and come back stronger every time you beat them. Create your fighter to begin.</div>
+    <div class="reg-box"><h2>CREATE YOUR FIGHTER</h2>
+    <div class="fg"><label>Your Name (everyone sees this!)</label><input id="rName" value="${p?.name||''}" placeholder="Enter your fighter name"></div>
+    <div class="fg"><label>Country</label><select id="rCountry">${COUNTRIES.map(c=>`<option${(p?.country===c)?' selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="fg"><label>State / Region</label><input id="rState" value="${p?.state||''}" placeholder="Your state or region"></div>
+    <div style="text-align:center;margin:15px 0 5px;padding:12px;background:rgba(255,215,0,.04);border-radius:8px">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Your auto-generated Player ID</div>
+    <div style="font-family:'Orbitron';font-size:16px;color:var(--gold2);letter-spacing:3px">#${tag}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Just for uniqueness \u2014 your NAME is what shows on the leaderboard</div></div>
+    <input type="hidden" id="rTag" value="${tag}">
+    <div style="text-align:center;margin-top:20px">
+    <button class="btn btn-g btn-sm" onclick="saveReg()">SAVE & FIGHT</button></div></div>
+    <button class="bk" onclick="S.screen='title';render()">\u2190 Back</button></div>`;
+}
+
+function saveReg(){const name=document.getElementById('rName').value.trim(),country=document.getElementById('rCountry').value,state=document.getElementById('rState').value.trim(),tag=document.getElementById('rTag').value;if(!name){alert('Enter a fighter name!');return;}saveProfile({name,country,state,tag});S.screen='ladder';render();}
+
+function rLad(){
+    const nx=nxO(),stats=getStats(),prof=getProfile();
+    let cd='';OPP.forEach((o,i)=>{
+        const bt=S.beaten.includes(i),isN=i===nx,lk=!bt&&i!==nx;
+        let cl='oc';if(bt)cl+=' d';else if(isN)cl+=' u cur';else if(lk)cl+=' l';else cl+=' u';
+        const ck=lk?'':`onclick="sO(${i})"`;
+        const learn=getLearn(i),rk=RANKS[i];
+        const best=getBestMoves(i);
+        const lrnTxt=learn.active?`<div class="olrn">\uD83E\uDDE0 STUDIED YOUR GAME \u2022 Foresight +${Math.min(learn.tb,2)}</div>`:'';
+        const bestTxt=best?`<div class="rec">\uD83C\uDFC5 Best: ${best.count} moves</div>`:'';
+        const att=stats.attempts[i]?` \u2022 ${stats.attempts[i]} attempt${stats.attempts[i]>1?'s':''}`:'';
+        cd+=`<div class="${cl}" ${ck}><div class="ork" style="background:${o.color}22;color:${o.color};border:2px solid ${o.color}">${i+1}</div><div class="oem">${o.emoji}</div><div class="oinf"><div class="onm" style="color:${lk?'var(--muted)':o.color}">${o.name}</div><div class="ost">${o.title}${att}</div>${lrnTxt}${bestTxt}</div><div class="oel"><div class="rnk" style="color:${rk.color}">${lk?'???':rk.tier}</div><div class="rkt">${lk?'':rk.cls}</div></div></div>`;
+    });
+    $.innerHTML=`<div class="lad fi">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
+        <button class="bk" onclick="S.screen='title';render()">\u2190 Back</button>
+        ${prof?`<span style="font-family:'Russo One';font-size:14px;color:var(--text)">\uD83D\uDC64 <span style="color:var(--gold)">${prof.name}</span> \u2022 ${prof.country}</span>`:''}
+        <button class="bk" onclick="S.screen='leaderboard';render()">\uD83C\uDFC6 Rankings</button>
+    </div>
+    <div class="lt">\uD83C\uDFC6 Championship Ladder</div>
+    <div class="lsb">Defeat each opponent to unlock the next \u2022 Win and they study your game \u2022 Rematches get tougher</div>
+    <div class="prb"><span style="color:var(--gold);font-weight:600;font-size:18px">${S.beaten.length}/10</span>
+    <span style="color:var(--muted);font-size:14px"> defeated</span>
+    <div class="pbar"><div class="pfill" style="width:${S.beaten.length*10}%"></div></div></div>${cd}</div>`;
+}
+
+function rPM(){
+    const o=OPP[S.opp],learn=getLearn(o.id),adj=getAdjusted(o),rk=RANKS[o.id];
+    const isLrn=learn.active;
+    const baseFS=foresight(o.depth),adjFS=isLrn?foresight(adj.depth):baseFS;
+    const basePrec=precisionLabel(o.rng),adjPrec=isLrn?precisionLabel(adj.rng):basePrec;
+    const best=getBestMoves(o.id);
+    $.innerHTML=`<div class="scr fi">
+    <div style="font-family:'Orbitron';font-size:18px;color:var(--muted);letter-spacing:6px;margin-bottom:25px">\u2014 ROUND ${S.opp+1} OF 10 \u2014</div>
+    <div style="font-size:120px;margin-bottom:15px">${o.emoji}</div>
+    <div style="font-family:'Orbitron';font-size:36px;font-weight:700;color:${o.color}">${o.name}</div>
+    <div style="font-size:16px;color:var(--muted);margin-bottom:5px">${o.title}</div>
+    <div style="font-size:18px;color:${rk.color};font-family:'Russo One';margin-bottom:15px">${rk.tier} \u2022 ${rk.cls} Class</div>
+    ${isLrn?`<div class="lrn-badge" style="font-size:14px;padding:6px 16px;margin-bottom:15px">\uD83E\uDDE0 HAS STUDIED YOUR GAME \u2022 Beaten ${learn.tb}x</div>`:''}
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;justify-content:center">
+        <div class="sbg"><div><div class="sbl">Foresight</div><div class="sbs" style="color:${isLrn?'var(--red)':rk.color}">${adjFS}</div><div style="font-size:11px;color:var(--muted)">${foresightLabel(isLrn?adj.depth:o.depth)}</div></div></div>
+        <div class="sbg"><div><div class="sbl">Precision</div><div class="sbv" style="color:${precisionColor(isLrn?adj.rng:o.rng)};font-size:16px">${adjPrec}</div></div></div>
+        <div class="sbg"><div><div class="sbl">Matches</div><div class="sbv" style="color:${rk.color}">${learn.gp}</div></div></div>
+    </div>
+    ${best?`<div class="rec" style="margin-bottom:15px">\uD83C\uDFC5 Your Record: ${best.count} moves</div>`:''}
+    <div style="font-style:italic;color:${isLrn?'var(--red)':'var(--muted)'};font-size:18px;margin-bottom:20px;max-width:450px">"${isLrn?o.chat.learned:o.chat.intro}"</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 28px;max-width:500px;text-align:left;margin-bottom:30px">
+        <div style="font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;font-family:'Russo One'">\uD83D\uDCCB Scouting Report</div>
+        <div style="font-size:15px;color:var(--muted);line-height:1.7">${o.scout}</div>
+    </div>
+    <button class="btn btn-r" style="font-size:28px;padding:22px 80px;letter-spacing:6px" onclick="stG()">FIGHT!</button>
+    <button class="bk" style="margin-top:18px" onclick="S.screen='ladder';render()">\u2190 Back</button></div>`;
+}
+
+function rGame(){
+    const o=OPP[S.opp],learn=getLearn(o.id),rk=RANKS[o.id];
+    let bh='';for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+        const p=S.board[r][c],lt=(r+c)%2===0;
+        let cl='sq '+(lt?'sl':'sd');
+        if(S.sel&&S.sel[0]===r&&S.sel[1]===c)cl='sq ss';
+        else if(S.valid.some(([vr,vc])=>vr===r&&vc===c))cl='sq sv';
+        else if(S.last&&((S.last.f[0]===r&&S.last.f[1]===c)||(S.last.t[0]===r&&S.last.t[1]===c)))cl='sq '+(lt?'sla':'sld');
+        const ph=p?`<span class="${isW(p)?'pw':'ppb'}">${SYM[p]}</span>`:'';
+        bh+=`<div class="${cl}" onclick="cSq(${r},${c})">${ph}</div>`;
+    }
+    let sc='gst ',st='';
+    if(S.status!=='active'){sc+='ste';st=S.status==='win'?'\uD83C\uDF89 YOU WIN!':'\uD83D\uDC80 DEFEATED!';}
+    else{sc+=S.player==='white'?'stp':'sta';st=S.player==='white'?'\u2654 Your Move':o.emoji+' '+o.name+' thinking...';}
+    $.innerHTML=`<div class="gs fi"><div class="gl"><div class="gh"><button class="btn btn-d btn-sm" onclick="S.screen='ladder';render()">\u2190</button>
+    <div class="gtl">${o.emoji} <span style="color:${o.color}">${o.name}</span>${learn.active?'<span class="lrn-badge">\uD83E\uDDE0</span>':''} \u2014 Round ${S.opp+1}</div></div>
+    <div class="bd">${bh}</div><div class="${sc}">${st}</div>
+    <div style="margin-top:6px;font-size:13px;color:var(--muted);font-family:'Russo One'">Move ${S.moves} \u2022 ${rk.tier}</div>
+    <div class="gc">${S.status==='active'?'<button class="btn btn-r btn-sm" onclick="res()">\uD83C\uDFF3 Resign</button>':''}
+    ${S.status!=='active'?`${S.status==='win'?'<button class="btn btn-gr btn-sm" onclick="hW()">Continue \u2192</button>':'<button class="btn btn-r btn-sm" onclick="S.screen=\'defeat\';render()">Continue</button>'}
+    <button class="btn btn-b btn-sm" onclick="stG()">\uD83D\uDD04 Rematch</button>
+    <button class="btn btn-d btn-sm" onclick="S.screen=\'ladder\';render()">\u2190 Ladder</button>`:''}</div></div>
+    <div class="gr"><div class="chdr"><div class="cem">${o.emoji}</div><div><div class="cnm" style="color:${o.color}">${o.name}</div><div class="cel">${rk.tier} \u2022 ${o.title}${learn.active?' \u2022 \uD83E\uDDE0 Studied':''}</div></div></div>
+    <div class="cmsg" id="cB"></div>
+    <div class="cina"><input class="cin" id="cI" placeholder="Talk to ${o.name}..." onkeydown="if(event.key==='Enter')sChat()"><button class="csnd" onclick="sChat()">Send</button></div></div></div>`;
+    rCh();
+}
+function rCh(){const b=document.getElementById('cB');if(!b)return;let h='';S.msgs.forEach(m=>{const c=m.t==='opp'?'mo':m.t==='player'?'mp':m.t==='sys'?'msy':'mmv';h+=`<div class="mg ${c}">${m.tx}</div>`;});b.innerHTML=h;b.scrollTop=b.scrollHeight;}
+function sChat(){const i=document.getElementById('cI');if(!i)return;const m=i.value.trim();if(!m)return;i.value='';addMsg('player',m);setTimeout(()=>addMsg('opp',getResp(OPP[S.opp],m)),400+Math.random()*600);}
+
+function rVic(){
+    const o=OPP[S.opp];if(S.opp===9){rChamp();return;}
+    const nx=OPP[S.opp+1],nxRk=RANKS[S.opp+1],nxLearn=getLearn(S.opp+1);
+    const best=getBestMoves(o.id),isNewRec=best&&best.count===S.moves;
+    const progress=S.beaten.length+1;
+    $.innerHTML=`<div class="scr fi"><div class="ri">\uD83C\uDF89</div><div class="rtl rw">VICTORY!</div>
+    <div class="rmg">You defeated <strong style="color:${o.color}">${o.name}</strong> in <strong style="color:var(--gold)">${S.moves} moves</strong>!
+    ${isNewRec?'<br><span style="color:var(--green)">\uD83C\uDFC5 NEW PERSONAL RECORD!</span>':''}
+    ${getLearn(o.id).active?'<br><em style="color:var(--red)">\uD83E\uDDE0 '+o.name+' has studied this game. Next time will be tougher!</em>':''}
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 30px;max-width:420px;margin-bottom:25px;text-align:center">
+    <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;font-family:'Russo One'">\uD83D\uDC4A Next Challenger \u2014 ${progress}/10</div>
+    <div style="font-size:42px;margin-bottom:6px">${nx.emoji}</div>
+    <div style="font-family:'Russo One';font-size:20px;color:${nx.color};margin-bottom:4px">${nx.name}</div>
+    <div style="font-size:14px;color:${nxRk.color};margin-bottom:4px">${nxRk.tier} \u2022 ${nxRk.cls}</div>
+    <div style="font-size:13px;color:var(--muted);font-style:italic">"${nx.chat.intro}"</div>
+    ${nxLearn.active?'<div style="margin-top:8px;color:var(--red);font-size:13px;font-family:Russo One">\u26A0 This opponent has studied your patterns!</div>':''}
+    </div>
+    <button class="btn btn-g" onclick="sO(${S.opp+1})">NEXT OPPONENT \u2192</button>
+    <button class="btn btn-d btn-sm" style="margin-top:10px" onclick="S.screen='ladder';render()">Ladder</button></div>`;
+}
+
+function rDef(){
+    const o=OPP[S.opp],learn=getLearn(o.id),rk=RANKS[o.id];
+    $.innerHTML=`<div class="scr fi"><div class="ri">\uD83D\uDC80</div><div class="rtl rlc">DEFEATED</div>
+    <div class="rmg"><strong style="color:${o.color}">${o.emoji} ${o.name}</strong> wins this round.<br>
+    <span style="color:var(--muted)">${rk.tier} \u2022 ${rk.cls} Class</span>
+    <br><br>Your record against ${o.name}: <strong style="color:var(--green)">${learn.gw} wins</strong> / <strong style="color:var(--red)">${learn.gp} matches</strong>
+    ${learn.active?'<br><em style="color:var(--red)">\uD83E\uDDE0 This opponent has studied your patterns \u2014 try a different approach!</em>':''}
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 28px;max-width:460px;text-align:left;margin-bottom:25px">
+    <div style="font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-family:'Russo One'">\uD83D\uDCCB Scouting Report</div>
+    <div style="font-size:15px;color:var(--muted);line-height:1.7">${o.scout}</div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="btn btn-r" onclick="stG()">\uD83D\uDD04 REMATCH</button>
+    <button class="btn btn-d btn-sm" onclick="S.screen='ladder';render()">Ladder</button></div></div>`;
+}
+
+function rChamp(){
+    const prof=getProfile();
+    $.innerHTML=`<div class="scr fi" style="background:radial-gradient(ellipse at 50% 40%,rgba(255,215,0,.12) 0%,transparent 60%)">
+    <div class="chbs">\uD83C\uDFC6</div><div class="chtl">WORLD CHAMPION!</div>
+    ${prof?`<div style="font-family:'Orbitron';font-size:36px;font-weight:900;color:#fff;margin-bottom:5px;text-shadow:0 0 30px rgba(255,215,0,.5)">${prof.name.toUpperCase()}</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:15px">${prof.country}${prof.state?', '+prof.state:''}</div>`:''}
+    <div style="font-size:18px;color:var(--gold2);margin-bottom:15px">You defeated all 10 opponents!</div>
+    <div style="color:var(--muted);font-size:16px;max-width:450px;line-height:1.7;margin-bottom:25px">
+    Total moves: <strong style="color:var(--gold)">${S.stats.totalMoves}</strong><br>
+    Submit your score to compete for the world record!</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="btn btn-g btn-sm" onclick="doSubmit()">\uD83C\uDFC6 Submit to Leaderboard</button>
+    <button class="btn btn-b btn-sm" onclick="S.screen='leaderboard';render()">\uD83D\uDCCA World Rankings</button>
+    <button class="btn btn-d btn-sm" onclick="S.screen='ladder';render()">Ladder</button>
+    <button class="btn btn-d btn-sm" onclick="rsAll()">\uD83D\uDD04 New Championship Run</button></div>
+    <div id="submitMsg" style="margin-top:15px;font-size:14px"></div></div>`;
+    spCf();
+}
+
+async function doSubmit(){
+    const prof=getProfile();if(!prof){alert('Register first!');return;}
+    const msg=document.getElementById('submitMsg');msg.innerHTML='<span style="color:var(--gold)">Submitting...</span>';
+    const r=await submitScore(prof,S.stats);
+    msg.innerHTML=r.ok?`<span style="color:var(--green)">\u2713 Score submitted! ${r.score} points \u2022 Look for "${prof.name}" on the leaderboard!</span>`:`<span style="color:var(--red)">\u2717 ${r.err}</span>`;
+}
+
+async function rLB(){
+    const prof=getProfile()||{name:'Guest',country:'United States',state:'',tag:'????-????'};
+    $.innerHTML=`<div class="scr fi"><div style="font-family:'Orbitron';font-size:32px;font-weight:700;color:var(--gold);margin-bottom:5px">\uD83C\uDFC6 LEADERBOARD</div>
+    <div style="color:var(--muted);font-size:14px;margin-bottom:15px">Lower score = better ranking \u2022 Beat all 10 opponents in fewer moves and fewer attempts to climb</div>
+    <div class="tabs">
+        <div class="tab${S.lbTab==='world'?' act':''}" onclick="S.lbTab='world';rLB()">\uD83C\uDF0D World</div>
+        <div class="tab${S.lbTab==='country'?' act':''}" onclick="S.lbTab='country';rLB()">\uD83C\uDDFA\uD83C\uDDF8 ${prof.country}</div>
+        <div class="tab${S.lbTab==='state'?' act':''}" onclick="S.lbTab='state';rLB()">\uD83D\uDCCD ${prof.state||'State'}</div>
+    </div>
+    <div class="lbd" id="lbBody"><div class="no-data">Loading rankings...</div></div>
+    <button class="bk" style="margin-top:15px" onclick="S.screen='title';render()">\u2190 Back</button></div>`;
+    const data=await fetchLeaderboard(S.lbTab,prof);
+    const body=document.getElementById('lbBody');if(!body)return;
+    if(!data||!data.length){body.innerHTML=`<div class="no-data">${getSupaKey()?'No scores yet. Be the first champion!':'<strong>Leaderboard not connected yet.</strong><br><br>Go to <span style="color:var(--gold)">Settings → Connect Leaderboard</span> to set up online rankings.<br>It\'s free and takes 30 seconds!'}</div>`;return;}
+    let rows='';data.forEach((d,i)=>{const me=d.player_tag===prof.tag?' style="background:rgba(255,215,0,.08)"':'';
+        const medal=i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':'';
+        const nameSize=i<3?'font-size:20px':'font-size:16px';
+        const rkColor=i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--gold)';
+        rows+=`<tr${me}><td class="rk" style="color:${rkColor};font-size:${i<3?'22px':'16px'}">${medal}#${i+1}</td><td><div style="font-family:'Russo One';${nameSize};color:${i<3?rkColor:'var(--text)'}">${d.player_name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${d.country}${d.state_region?', '+d.state_region:''}</div></td><td class="sc" style="font-size:${i<3?'18px':'15px'}">${d.score}</td><td style="font-size:13px;color:var(--muted)">${d.total_moves} moves<br>${d.total_attempts} attempts</td></tr>`;
+    });
+    body.innerHTML=`<table class="lbt"><thead><tr><th style="width:80px">Rank</th><th>Fighter</th><th>Score</th><th>Stats</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function rRec(){
+    const prof=getProfile();
+    let cards='';OPP.forEach((o,i)=>{
+        const best=getBestMoves(i),rk=RANKS[i],bt=S.beaten.includes(i);
+        cards+=`<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px">
+        <div style="font-size:32px">${o.emoji}</div>
+        <div style="flex:1"><div style="font-family:'Russo One';color:${o.color}">${o.name}</div><div style="font-size:13px;color:var(--muted)">${rk.tier} \u2022 ${rk.cls}</div></div>
+        <div style="text-align:right">${best?`<div class="rec">\uD83C\uDFC5 ${best.count} moves</div>`:(bt?'<span style="color:var(--green);font-size:13px">\u2713 Beaten</span>':'<span style="color:var(--muted);font-size:13px">\u2014</span>')}</div></div>`;
+    });
+    $.innerHTML=`<div class="scr fi" style="justify-content:flex-start;padding-top:40px">
+    <div style="font-family:'Orbitron';font-size:28px;font-weight:700;color:var(--gold);margin-bottom:5px">\uD83C\uDFC5 PERSONAL RECORDS</div>
+    <div style="color:var(--muted);font-size:14px;margin-bottom:20px">Your best victories \u2022 Beat your own records for a better championship score</div>
+    <div style="max-width:550px;width:100%">${cards}</div>
+    <button class="bk" style="margin-top:15px" onclick="S.screen='title';render()">\u2190 Back</button></div>`;
+}
+
+function rSet(){
+    const prof=getProfile(),key=getSupaKey(),connected=!!key;
+    $.innerHTML=`<div class="scr fi" style="justify-content:flex-start;padding-top:40px">
+    <div style="font-family:'Orbitron';font-size:28px;font-weight:700;color:var(--gold);margin-bottom:20px">\u2699 Settings</div>
+    <div style="max-width:520px;width:100%;text-align:left">
+
+    <h3 style="font-family:'Russo One';color:var(--gold);margin:20px 0 10px">\uD83D\uDC64 Your Fighter Profile</h3>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:10px;line-height:1.6">This is YOU on the leaderboard. Your name shows up big and bold when you're ranked. Pick a name you're proud of!</div>
+    <div class="reg-box" style="margin-top:0">
+    ${prof?`<div style="text-align:center;margin-bottom:10px"><div style="font-size:11px;color:var(--muted)">YOUR UNIQUE ID (auto-generated)</div><div style="font-family:'Orbitron';font-size:14px;color:var(--gold2);margin-top:4px">#${prof.tag}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">This just makes sure no two players get mixed up</div></div>`:''}
+    <div class="fg"><label>Your Name (this shows on leaderboard!)</label><input id="sName" value="${prof?.name||''}" placeholder="The name everyone will see"></div>
+    <div class="fg"><label>Country</label><select id="sCountry">${COUNTRIES.map(c=>`<option${(prof?.country===c)?' selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="fg"><label>State / Region</label><input id="sState" value="${prof?.state||''}"></div>
+    <button class="btn btn-g btn-sm" onclick="let p=getProfile()||{tag:genTag()};p.name=document.getElementById('sName').value;p.country=document.getElementById('sCountry').value;p.state=document.getElementById('sState').value;saveProfile(p);alert('Profile saved!')">Save Profile</button></div>
+
+    <h3 style="font-family:'Russo One';color:${connected?'var(--green)':'var(--gold)'};margin:30px 0 10px">${connected?'\u2705':'\uD83C\uDF10'} Connect to Online Leaderboard</h3>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:15px">
+    <div style="font-size:15px;color:var(--text);line-height:1.8;margin-bottom:15px">
+        <strong style="color:var(--gold)">What is this?</strong><br>
+        This connects the game to an online database so your scores appear on the <strong>World, Country, and State leaderboards</strong>. Other players can see your name and ranking.
+    </div>
+    <div style="font-size:15px;color:var(--text);line-height:1.8;margin-bottom:15px">
+        <strong style="color:var(--green)">\uD83D\uDCB0 Does it cost money? NO!</strong><br>
+        The leaderboard runs on Supabase (a free database service). The "API key" is just a password that connects this game to the leaderboard database. It's completely free.
+    </div>
+    <div style="font-size:15px;color:var(--text);line-height:1.8;margin-bottom:15px">
+        <strong style="color:var(--gold)">\uD83D\uDCD6 How do I get the key?</strong><br>
+        If you downloaded this game, the developer should have given you the key. Just paste it below and you're connected! If you're the developer, get it from your Supabase dashboard → Settings → API → anon public key.
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:14px;height:14px;border-radius:50%;background:${connected?'var(--green)':'var(--red)'};flex-shrink:0"></div>
+        <div style="font-family:'Russo One';font-size:14px;color:${connected?'var(--green)':'var(--red)'}">${connected?'CONNECTED \u2014 Leaderboard is live!':'NOT CONNECTED \u2014 Paste your key below'}</div>
+    </div>
+    <div class="fg" style="margin-bottom:8px"><label>Leaderboard Key</label><input id="sKey" value="${key}" placeholder="Paste the API key here" style="font-family:monospace;font-size:13px"></div>
+    <button class="btn btn-b btn-sm" onclick="setSupaKey(document.getElementById('sKey').value);render()">Save & Connect</button>
+    </div>
+
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px">
+    <strong>\uD83D\uDCA1 Without the key:</strong> The game works perfectly! You can play all 10 opponents, the AI still learns from your games, and your progress saves locally. You just won't appear on the online leaderboard or see other players' rankings.
+    </div>
+
+    <h3 style="font-family:'Russo One';color:var(--red);margin:20px 0 10px">\u26A0 Reset Options</h3>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:10px;line-height:1.6">These actions cannot be undone!</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-r btn-sm" onclick="if(confirm('Reset AI learning? All 10 opponents forget everything they learned about you.')){for(let i=0;i<10;i++)localStorage.removeItem('cch-learn-'+i);alert('AI learning reset! Opponents are back to default difficulty.');}">Reset AI Learning</button>
+    <button class="btn btn-r btn-sm" onclick="if(confirm('Reset ALL progress? Championship, records, everything starts over.')){rsAll();}">Reset Everything</button></div></div>
+    <button class="bk" style="margin-top:20px" onclick="S.screen='title';render()">\u2190 Back</button></div>`;
+}
+
+function spCf(){const cs=['#ffd700','#ff8c00','#e74c3c','#2ecc71','#3498db','#9b59b6','#fff'];for(let i=0;i<60;i++){const e=document.createElement('div');e.className='cf';e.style.left=Math.random()*100+'vw';e.style.background=cs[Math.floor(Math.random()*cs.length)];e.style.width=(6+Math.random()*12)+'px';e.style.height=(6+Math.random()*12)+'px';e.style.borderRadius=Math.random()>.5?'50%':'0';e.style.animationDuration=(2+Math.random()*3)+'s';e.style.animationDelay=Math.random()*2+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),6000);}}
+
+// ========== GAME FLOW ==========
+function goNext(){const p=getProfile();S.screen=p?'ladder':'register';render();}
+function nxO(){for(let i=0;i<OPP.length;i++)if(!S.beaten.includes(i))return i;return 0;}
+function sO(i){S.opp=i;S.screen='prematch';render();}
+function stG(){
+    S.board=INIT.map(r=>[...r]);S.player='white';S.sel=null;S.valid=[];S.log=[];
+    S.status='active';S.last=null;S.moves=0;S.msgs=[];
+    S.tracker={moves:[],opening:[],pp:{P:0,N:0,B:0,R:0,Q:0,K:0},az:{k:0,q:0,c:0}};
+    S.stats.attempts[S.opp]=(S.stats.attempts[S.opp]||0)+1;saveStats(S.stats);
+    S.screen='game';render();
+    const o=OPP[S.opp],learn=getLearn(o.id),rk=RANKS[o.id];
+    addMsg('sys','Round '+(S.opp+1)+' \u2022 '+o.name+' \u2022 '+rk.tier+(learn.active?' \u2022 \uD83E\uDDE0 Studied':''));
+    addMsg('opp',learn.active?o.chat.learned:o.chat.intro);
+}
+function cSq(r,c){
+    if(S.status!=='active'||S.player!=='white')return;
+    if(aM(S.board,'white').length===0){S.status='lose';addMsg('sys','No legal moves available!');finishLearn(S.opp,false);render();return;}
+    const p=S.board[r][c];
+    if(S.sel){const[sr,sc]=S.sel;if(S.valid.some(([vr,vc])=>vr===r&&vc===c)){mk([sr,sc],[r,c],'white');return;}S.sel=null;S.valid=[];if(p&&isP(p,'white')){S.sel=[r,c];S.valid=gM(S.board,r,c,p);}}
+    else if(p&&isP(p,'white')){S.sel=[r,c];S.valid=gM(S.board,r,c,p);}
+    render();
+}
+function mk(f,t,pl){
+    const cap=S.board[t[0]][t[1]],pc=S.board[f[0]][f[1]];
+    S.board=ap(S.board,f,t);S.log.push({pl,pc,f,t,cap});S.last={f,t};S.sel=null;S.valid=[];S.moves++;
+    addMM(pc,f,t,cap,pl);
+    if(pl==='white')trackMove(f,t,pc);
+    if(cap?.toLowerCase()==='k'){
+        S.status=pl==='white'?'win':'lose';
+        const o=OPP[S.opp],ms=S.status==='win'?o.chat.losing:o.chat.winning;
+        addMsg('opp',Array.isArray(ms)?ms[Math.floor(Math.random()*ms.length)]:ms);
+        finishLearn(S.opp,S.status==='win');
+        if(S.status==='win'){
+            if(!S.beaten.includes(S.opp)){S.stats.totalMoves+=S.moves;saveStats(S.stats);}
+            const isNew=saveBestMoves(S.opp,S.tracker.moves,S.moves);
+            if(isNew)addMsg('sys','\uD83C\uDFC5 NEW PERSONAL RECORD: '+S.moves+' moves!');
+            const prof=getProfile();
+            if(prof&&getSupaKey())submitGhost(prof,S.opp,S.tracker.moves,S.moves);
+        }
+        render();return;
+    }
+    if(cap&&pl==='black'){const ms=OPP[S.opp].chat.capture;addMsg('opp',Array.isArray(ms)?ms[Math.floor(Math.random()*ms.length)]:ms);}
+    if(S.moves>200){S.status='lose';addMsg('sys','Game exceeded 200 moves!');finishLearn(S.opp,false);render();return;}
+    if(pl==='white'){S.player='black';render();setTimeout(doAI,350);}
+    else{S.player='white';if(!cap&&Math.random()<.3){const ms=OPP[S.opp].chat.moved;addMsg('opp',Array.isArray(ms)?ms[Math.floor(Math.random()*ms.length)]:ms);}render();}
+}
+function doAI(){
+    if(S.status!=='active')return;
+    const o=OPP[S.opp],adj=getAdjusted(o);
+    const mv=aiMv(S.board,adj.depth,adj.rng,adj.w);
+    if(!mv){S.status='win';addMsg('opp',Array.isArray(o.chat.losing)?o.chat.losing[0]:o.chat.losing);finishLearn(S.opp,true);if(!S.beaten.includes(S.opp)){S.stats.totalMoves+=S.moves;saveStats(S.stats);}saveBestMoves(S.opp,S.tracker?.moves||[],S.moves);const prof=getProfile();if(prof&&getSupaKey())submitGhost(prof,S.opp,S.tracker?.moves||[],S.moves);render();return;}
+    mk(mv.f,mv.t,'black');
+}
+function res(){S.status='lose';addMsg('opp',Array.isArray(OPP[S.opp].chat.winning)?OPP[S.opp].chat.winning[0]:OPP[S.opp].chat.winning);finishLearn(S.opp,false);S.screen='defeat';render();}
+function hW(){if(!S.beaten.includes(S.opp)){S.beaten.push(S.opp);saveBeaten(S.beaten);}S.screen=S.opp===9?'champion':'victory';render();}
+function rsAll(){S.beaten=[];saveBeaten([]);S.stats={attempts:{},totalMoves:0};saveStats(S.stats);for(let i=0;i<10;i++){localStorage.removeItem('cch-best-'+i);localStorage.removeItem('cch-learn-'+i);}S.screen='title';render();}
+render();
+</script>
+</body>
+</html>
