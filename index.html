@@ -1,9 +1,14 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     CHAMPIONSHIP CHESS  v7.1   (built 2026-07-12)
+     V7.1 - Masters now understand a question when it MEANS the same thing, even if worded differently or mistyped (fuzzy 'sounds-like' matching). Deep bible answers (family, record, life, mentors, love) that only surface when asked. Branch-tree follow-ups. Engine unchanged from V7.0 (perft 20/400).
+     ============================================================ -->
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Championship Chess V7 — Nested Thirds</title>
+<title>Championship Chess V7.1 — Nested Thirds (Conversational)</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -228,6 +233,22 @@ input:focus { outline:2px solid var(--gold); outline-offset:2px; }
 .resume-yes:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,165,116,.35); }
 .resume-no    { flex:1; padding:13px; background:transparent; border:1px solid var(--gold3); border-radius:7px; font-family:'Cinzel',serif; font-size:.95em; color:var(--gold3); cursor:pointer; letter-spacing:2px; text-transform:uppercase; transition:all .2s; }
 .resume-no:hover { background:rgba(212,165,116,.07); color:var(--gold); border-color:var(--gold); }
+
+/* ===== TABLE ENGINE — chat (chess) ===== */
+.chat-dock2{margin-top:8px;}
+.chat-log2{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:8px;
+  padding:7px 9px;max-height:120px;overflow-y:auto;font-size:12px;line-height:1.45;margin-bottom:6px;}
+.chat-log2 .cmsg{margin:3px 0;}
+.chat-log2 .cwho{font-weight:700;margin-right:5px;opacity:.9;}
+.chat-log2 .cme .cwho{color:#7fb2ff;}
+.chat-log2 .cthem .cwho{color:#e0b34c;}
+.chat-row2{display:flex;gap:6px;}
+.chat-in2{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);color:#eee;
+  border-radius:7px;padding:8px 10px;font-size:13px;outline:none;min-width:0;}
+.chat-in2:focus{border-color:#e0b34c;}
+.chat-btn2{background:#e0b34c;color:#1a1408;border:none;border-radius:7px;padding:8px 13px;
+  font-weight:700;cursor:pointer;font-size:13px;}
+.chat-btn2:active{transform:scale(.97);}
 </style>
 </head>
 <body>
@@ -297,6 +318,7 @@ input:focus { outline:2px solid var(--gold); outline-offset:2px; }
   <div class="intro-card">
     <h1>CHAMPIONSHIP CHESS</h1>
     <p class="intro-sub">Do You Have What It Takes?</p>
+    <p style="text-align:center;font-size:11px;letter-spacing:1px;opacity:.5;margin-top:2px">VERSION 7.1 &middot; 2026-07-12</p>
     <div class="intro-story" id="introStory">
       <p>I don't know why you're here.</p>
       <p>We took one look at you and thought... <span class="hl">maybe.</span></p>
@@ -359,6 +381,14 @@ input:focus { outline:2px solid var(--gold); outline-offset:2px; }
         <div class="dlg-sp" id="dlgSp"></div>
         <div id="dlgTx">The match awaits...</div>
       </div>
+      <div class="chat-dock2" id="chatDock2">
+        <div class="chat-log2" id="chatLog2"></div>
+        <div class="chat-row2">
+          <input class="chat-in2" id="chatIn2" maxlength="200" placeholder="Talk to your opponent..." autocomplete="off"/>
+          <button class="chat-btn2" id="chatBtn2">Say</button>
+        </div>
+      </div>
+
       <div class="pw-block">
         <div class="pw-title">YOUR FIGHTER PROFILE</div>
         <div class="pw-row"><span class="pw-lbl">Wound: </span><span class="pw-val" id="gWound"></span></div>
@@ -406,9 +436,12 @@ input:focus { outline:2px solid var(--gold); outline-offset:2px; }
 //  PAYWALL
 // ═══════════════════════════════════════════════════════════════
 const FREE_COUNT = 2; // Timmy + Betty free
+// Friends' unlock code (case-insensitive — input is upper-cased before checking).
+// Give this one out: 1chunky2chicken3  (any capitalization works).
+// The 1TURKEY.../1ROCKY.../1FUNKY... entries were only format EXAMPLES and have been retired.
 const GATE_CODES = new Set([
-  'CHESSCHAMP99','DROME7207VIP','NESTED3RDS','1JAZZY2PICKLE3',
-  '1TURKEY2CHICKEN3','1ROCKY2TACO3','1FUNKY2MONKEY3','CHAMPION2026'
+  '1CHUNKY2CHICKEN3',                                   // <-- the real friends code
+  'CHESSCHAMP99','DROME7207VIP','NESTED3RDS','CHAMPION2026'  // your own personal/brand codes (kept)
 ]);
 const GATE_URL = 'https://gum.co/champchess';
 
@@ -1519,6 +1552,385 @@ if(location.hash==="#perft"){
   document.body.innerHTML="<pre style='color:#f2e9d8;background:#15130f;padding:30px;"+
     "font-size:15px;line-height:1.7;min-height:100vh;margin:0'>"+out+"</pre>";
 }
+
+// ============================================================
+// THE TABLE ENGINE (CHESS) — Drago Conversational Core v1.1
+// 7 masters · Hook/Twist/Land banks · Domain Lock + warm
+// Deflection Ladder · callbacks · legend · no-repeat
+// ============================================================
+// FUZZY: when the wording isn't exact but MEANS the same thing,
+// score every lane by how many of its signal words show up
+// (with 1-typo tolerance) and take the best. Never a dead end.
+// Word-boundary matcher: every entry is a WHOLE word unless it ends in "*" (stem) or contains a space (phrase).
+// Ambiguous game-talk words (win, hard, love, play, champion) are deliberately kept OUT of personal lanes.
+var FUZZY = {
+  nervous:["nervous","scared","afraid","shaking","shaky","jittery","anxious","worried","tense","panic","panicky","sweating","nerves","stressed","fidgety","uneasy"],
+  who:["yourself","introduce","identity"],
+  family:["family","brother","brothers","sister","sisters","sibling","siblings","mom","mum","mommy","momma","mother","dad","papa","father","parent","parents","kids","children","son","daughter","niece","nephew","uncle","aunt","cousin","grandma","grandpa","grandmother","grandfather","folks","youngest","oldest"],
+  record:["record","wins","matches","losses","games","rating","won","winrate","ranked","beaten","victories","undefeated"],
+  life:["childhood","struggle","struggled","struggling","bullied","upbringing","suffered","hardship","orphan"],
+  mentor:["taught","teacher","coach","mentor","learn","learned","learning","trained","training","showed","tutor"],
+  peers:["opponents","players","others","everyone","everybody","competition","betty","carlos","sasha","chen","marcus","timmy","rivals"],
+  work:["job","work","working","occupation","profession","employed"],
+  school:["college","school","studied","study","degree","education","graduate","graduated","dropout","hvac","student"],
+  love:["girlfriend","boyfriend","wife","husband","dating","married","rosa","romance"],
+  rules:["rule","rules","hint","castle","castling","promote","promotion","passant","opening","endgame","strategy","strategic","tactic","tactics","explain","legal","improve","stronger","better player","get better","coach me","teach me"],
+  praise:["impressive","brilliant","amazing","awesome","clever","genius","talented","lovely","beautiful","wonderful","masterful","good game","great game","good match","great match","nice game","well played","good move"],
+  trash:["suck","trash","weak","crush","destroy","loser","garbage","pathetic"],
+  thanks:["thank*","appreciate","grateful","gracias"],
+  bye:["bye","goodbye","goodnight","leaving","farewell"],
+  culture:["wound","coffee","grandmaster","tournament","dream","a champion","world champion"]
+};
+var CONV = {
+  mem:null,
+  initMatch:function(){
+    this.mem={firstMove:null,rung:0,said:{},greeted:false};
+    var el=document.getElementById("chatLog2"); if(el) el.innerHTML="";
+  },
+  post:function(who,text,me){
+    var el=document.getElementById("chatLog2"); if(!el) return;
+    var d=document.createElement("div"); d.className="cmsg "+(me?"cme":"cthem");
+    var w=document.createElement("span"); w.className="cwho"; w.textContent=who+":";
+    d.appendChild(w); d.appendChild(document.createTextNode(text));
+    el.appendChild(d); el.scrollTop=el.scrollHeight;
+    while(el.children.length>28) el.removeChild(el.firstChild);
+  },
+  norm:function(t){
+    var x=(t||"").toLowerCase();
+    x=x.replace(/[^a-z0-9'\s]/g," ");        // strip punctuation
+    x=x.replace(/([a-z])\1{2,}/g,"$1$1");    // sooo -> soo (voice-to-text stutter)
+    x=x.replace(/\s+/g," ").replace(/^\s+|\s+$/g,"");
+    return x;
+  },
+  ed1:function(a,b){                          // true if edit distance <= 1
+    if(a===b) return true;
+    var la=a.length,lb=b.length; if(Math.abs(la-lb)>1) return false;
+    var i=0,j=0,d=0;
+    while(i<la&&j<lb){
+      if(a.charAt(i)===b.charAt(j)){i++;j++;}
+      else{ if(++d>1) return false; if(la>lb){i++;} else if(lb>la){j++;} else {i++;j++;} }
+    }
+    if(i<la||j<lb) d++;
+    return d<=1;
+  },
+  tokHit:function(toks,x,w){
+    // "*" = intentional stem: matches the start of a whole word (struggl* -> struggle/struggling)
+    if(w.charAt(w.length-1)==="*"){ var st=w.slice(0,-1);
+      for(var s=0;s<toks.length;s++){ if(toks[s].indexOf(st)===0) return 2; } return 0; }
+    // phrase (has a space): whole-phrase substring, strong
+    if(w.indexOf(" ")>=0) return x.indexOf(w)>=0 ? 2 : 0;
+    // single word: MUST be a whole word, never a fragment inside another
+    // (blocks won<-wonderful, win<-winter, love<-lovely, champion<-championship)
+    for(var i=0;i<toks.length;i++){ if(toks[i]===w) return 2; }
+    // typo tolerance: a token 1 letter off, both 5+ letters, weak signal
+    if(w.length>=5){ for(var j=0;j<toks.length;j++){ if(toks[j].length>=5 && this.ed1(toks[j],w)) return 1; } }
+    return 0;
+  },
+  fuzzy:function(x){
+    var toks=x.split(" ");
+    var best="steer",bestScore=0;
+    for(var k in FUZZY){
+      var arr=FUZZY[k],s=0;
+      for(var i=0;i<arr.length;i++){ s+=this.tokHit(toks,x,arr[i]); }
+      if(s>bestScore){ bestScore=s; best=k; }
+    }
+    return bestScore>0?best:"steer";
+  },
+  classify:function(t){
+    var x=this.norm(t);
+    var self=this;
+    function has(){ for(var i=0;i<arguments.length;i++){ if(x.indexOf(arguments[i])>=0) return true; } return false; }
+    // off-domain = the PLAYER's real-world life ("my job"), NOT asking the character about theirs ("your job" -> work lane)
+    if(has("politic","president","election","news","weather","crypto","stock","bitcoin","invest","religio","domino","my career","my job","get a job","find a job","job interview","my resume","youtube","movie","netflix","football","basketball","homework","dating advice","dating app")) return "offdomain";
+    if(has("hello","hola","good evening","good morning","what's up","whats up","howdy")||x==="hi"||x==="yo"||x==="hey"||x==="sup"||x.indexOf("hi ")===0||x.indexOf("hey ")===0||x.indexOf("hey,")===0) return "greet";
+    if(has("why are you nervous","why so nervous","why you nervous","you nervous","so nervous","are you okay","are you ok","you okay","calm down","relax","take it easy","don't be nervous","dont be nervous","are you scared","you scared","why are you shaking","you seem nervous","settle down","breathe","chill","are you alright","you alright")) return "nervous";
+    // ---- BRANCH LANES: follow-ups that earlier answers provoke ----
+    if(has("who is everybody","who's everybody","whos everybody","what do you mean how it ends","how does it end","how it ends","being filed","they file","already know","knew you'd lose","expect you to lose","everyone expects","who expects")) return "filed";
+    if(has("parking lot","the door","four minutes","stood outside","what door","the glass","almost left","almost didn't come","almost quit","walk away")) return "door";
+    if(has("what sheet","the sheet","sign the sheet","all seven","seven rounds","play all","why seven","finish all")) return "sheet";
+    if(has("what happened at the gym","the gym","talent show","the cards","card trick","how'd you get that name","how did you get the name","why tumbles","why do they call","the tumble","fell")) return "gymfloor";
+    if(has("why does finishing matter","why finish","what does finishing","finishing mean","why is finishing","need to finish","about finishing")) return "finishing";
+    if(has("rabbit","lucky foot","lucky charm","superstition")) return "rabbit";
+    if(has("who are you","your name","about yourself","where are you from","who is","tell me about yourself","your story","introduce yourself")) return "who";
+    if(has("brother","sister","sibling","family","parents","your mom","your dad","your mother","your father","youngest","your kids","niece","nephew","only child")) return "family";
+    if(has("how many win","how many loss","how many game","your record","win loss","wins and loss","your rating","how good are you","win rate","ever won","how many have you")) return "record";
+    if(has("good life","hard life","struggle","struggl","childhood","grow up","growing up","were you happy","was it hard","rough life","rough childhood","was it rough","tough life","did you have a good","your past","bullied","lonely")) return "life";
+    if(has("who taught","your teacher","your coach","mentor","learn chess","learn to play","how did you learn","who trained")) return "mentor";
+    if(has("do you know","other player","the others","know timmy","know betty","know pete","know carlos","know sasha","know chen","know marcus","know the mind","tell me about the other","who else","opponents")) return "peers";
+    if(has("your job","what do you do for","for a living","your work","occupation","where do you work","day job")) return "work";
+    if(has("college","school","did you study","your degree","education","hvac","drop out","dropout","graduate")) return "school";
+    if(has("girlfriend","boyfriend","wife","husband","are you single","seeing anyone","rosa","married")) return "love";
+    if(has("your bag","the cards","the deck","pack of cards","what's in your")) return "deck";
+    if(has("why do you play","your wound","what do you want","what are you afraid","your fear","how long have you played","1989","minsk","coffee","drink tea","grandmaster","a champion","world champion","tournament")) return "culture";
+    if(has("how do i","how to","rule","help","hint","which piece","what should i","castle","castling","en passant","promotion","promote","stuck","opening","endgame","fork","pin")) return "rules";
+    if(has("score","winning","losing","who is ahead","am i doing","advantage","material","beat you","beating you","how many moves")) return "gamestate";
+    // CHALLENGE lane: sharp skeptical provocations get a characterful comeback, not a generic redirect.
+    // All multi-word phrases -> boundary-safe, cannot reopen substring overfires.
+    if(has("champion of what","you love this","prove it","says who","who says","says you","impress me","think you're better","think youre better","think you're so","think youre so","what makes you so","you're not that good","youre not that good","you're not so","bet you can't","bet you cant","big talk")) return "challenge";
+    if(has("good move","nice","great play","well played","impressive","you are good","you're good","respect","brilliant")) return "praise";
+    if(has("you suck","trash","easy","too slow","scared","weak","gonna lose","you will lose","crush","destroy","checkmate you")) return "trash";
+    if(has("thank","gracias")) return "thanks";
+    if(has("bye","goodbye","see you","later","goodnight","good night")) return "bye";
+    return this.fuzzy(x);   // sounds like it but not exact -> best-matching lane, not a dead end
+  },
+  say:function(){
+    var inp=document.getElementById("chatIn2"); if(!inp) return;
+    var t=inp.value.replace(/^\s+|\s+$/g,""); if(!t) return; inp.value="";
+    if(!gs.opp||!this.mem) return;
+    this.post((gs.player&&gs.player.name)||"You",t,true);
+    var intent=this.classify(t), reply;
+    if(intent==="offdomain"){
+      this.mem.rung=Math.min(3,this.mem.rung+1);
+      reply=this.pick("off"+this.mem.rung)||this.pick("off3");
+    } else if(intent==="gamestate"){
+      reply=this.gamestate();
+    } else {
+      reply=this.pick(intent)||this.pick("steer");
+    }
+    var self=this;
+    setTimeout(function(){ self.post(gs.opp.name,reply,false); dlgShow(reply,gs.pState); },420+Math.random()*600);
+  },
+  pick:function(key){
+    if(!gs.opp) return "";
+    var bank=(CONV_BANKS[gs.opp.id]&&CONV_BANKS[gs.opp.id][key])||[];
+    if(!bank.length) return "";
+    var said=this.mem.said[key]||[];
+    var fresh=[]; for(var i=0;i<bank.length;i++){ if(said.indexOf(i)<0) fresh.push(i); }
+    if(!fresh.length){ fresh=[]; for(var j=0;j<bank.length;j++) fresh.push(j); this.mem.said[key]=[]; said=this.mem.said[key]; }
+    var idx=fresh[Math.floor(Math.random()*fresh.length)];
+    said.push(idx); this.mem.said[key]=said;
+    var line=bank[idx];
+    line=line.replace("{pname}",(gs.player&&gs.player.name)||"challenger");
+    if(line.indexOf("{legend}")>=0) line=line.replace("{legend}",this.legend());
+    if(line.indexOf("{firstmove}")>=0) line=line.replace("{firstmove}",this.mem.firstMove||"your first move");
+    return line;
+  },
+  gamestate:function(){
+    var adv=gs.adv||0, mv=gs.moves||0;
+    var lead = adv>1 ? "you hold the material" : (adv<-1 ? "I hold the material" : "the board is even");
+    var mood={baseline:"and I am comfortable",fracture:"and you have my attention",pressure:"and you are pressing me",shift:"and this game is decided in spirit if not on paper"}[gs.pState]||"";
+    var core=lead+" after "+mv+" of your moves, "+mood;
+    var wrap=(CONV_BANKS[gs.opp.id]&&CONV_BANKS[gs.opp.id].scorewrap)||"%s.";
+    return wrap.replace("%s",core);
+  },
+  legend:function(){
+    var names=[]; for(var i=0;i<OPPONENTS.length;i++){ if(gs.wins&&gs.wins.indexOf(OPPONENTS[i].id)>=0) names.push(OPPONENTS[i].name); }
+    if(!names.length) return "the circuit is already whispering about you";
+    var two=names.slice(-2).join(" and ");
+    return two+" told me about you before you sat down";
+  },
+  onPlayerMove:function(fr,fc,tr,tc){
+    if(this.mem&&!this.mem.firstMove) this.mem.firstMove=sqName(fr,fc)+" to "+sqName(tr,tc);
+  },
+  closeLine:function(){
+    if(!gs.opp||!this.mem) return;
+    var line=this.pick("closewin");
+    if(line){ this.post(gs.opp.name,line,false); }
+  }
+};
+
+// ---------- THE SEVEN — chat banks (built from each master's own voice) ----------
+var CONV_BANKS = {
+timmy:{
+ greet:["Oh! Hi! You said hi! Okay. Good start. Great start. I rehearsed this part.","H-hey! I was just... breathing. Strategically. Ready when you are!"],
+ who:["Timmy. Timmy Tumbles. The nickname wasn't my idea but it... it stuck. I'm going to finish this tournament. That's the whole plan.","Timothy Raymond Mercer, but nobody's called me Timothy since a teacher tried it once. I'm the guy everyone expects to lose — which means every game I DON'T lose is a little miracle I made myself.","I'm twenty-three, from Dayton, Ohio. Born in an ice storm, my mom says, like that explains me. Maybe it does."],
+ filed:["Everybody. My family. The people who've known me since I was a kid. Nobody's mean about it — that's the thing. They just... already have me filed. There's a folder with my name on it and every unfinished thing goes in it.","How it ends? Timmy doesn't finish. That's the story. Piano, Scouts, cross country, sch— *(stops)* — a lot of things. People stopped expecting me to get to the end of stuff, and after a while, so did I. That's what I'm here to argue with.","My brother opened the file at a dinner table when I was eight, and it's been filling up ever since. The worst part isn't that they're wrong. It's that they've all got the same folder and they're mostly RIGHT, and being right is impossible to tell apart from being mean when you're the one in the folder.","It's not a mean thing, it's a nodding thing. When I mess up, nobody at home goes 'oh no' — they go 'there it is.' You spend twenty years watching people nod and you start nodding along. I'm here to see if I can make one person go 'oh' instead. ...Your move."],
+ door:["*(small laugh, embarrassed)* Pete's chess club, back in November. I stood outside the glass with my hand on the door for four whole minutes. Pete counted from inside. Four minutes deciding whether to come in or go back to the car.","I'm always about four minutes from the parking lot, buddy. Every big thing in my life, there's a door, and I stand at it, and usually I leave. The library was the first time I didn't. Pete's fault, honestly — he asked me if I played before I could talk myself out of it.","The parking lot's where I go. Metaphorically. It's the place right before the part where somebody could see me try. I've spent a lot of my life in parking lots. I'm trying to spend more of it in the building.","Pete looked up and said 'you play, or you just like watching old men suffer?' and I don't know, something about the way he didn't ask if I was any good — I came in. First door I walked through in years. Now I'm here. Different door. Same four minutes, I just... used them up quicker this time."],
+ sheet:["The sheet! You sign a sheet after each round — it's proof you played. And I know that sounds like nothing, but I've got a whole life of rounds I never signed. The recital I skipped. The meet. The— yeah. Seven signed sheets is the entire goal. Not the trophy. The sheets.","All seven rounds. That's what I'm here for. Win, lose, doesn't matter — I want to sit down all seven times and finish all seven games. For most people that's Tuesday. For me it's kind of the whole war.","Why seven? Because I've never finished seven of anything. I get to like game five of things and find a reason to leave. If I sign all seven sheets, that's the first thing in my whole life I took all the way to the end where people could see it. That's why I keep saying it. Sorry. Your move.","Playing all seven isn't a modest goal for me, is the thing. Count up the rounds in my life I left unplayed and you'd understand. This is me trying to have an ending that exists somewhere outside my own head."],
+ gymfloor:["*(the mask, smooth)* Third-grade talent show. Me, a microphone cord, and fifty-two cards, all going different directions at once. My foot found the cord and I went down like a folding chair. My brother named me Timmy Tumbles at dinner that night and it stuck.","Here's the part nobody remembers, including me most days: I was GOOD at the card tricks. Practiced six weeks. Then I tripped on the cord and the whole gym laughed and that's the only part that survived. I never did another trick. The deck's still in my sock drawer, one card short.","The gym floor's kind of where 'Timmy Tumbles' was born. Eight years old, on my knees under the lights picking up cards while everybody laughed. I learned right there: if you laugh at yourself first, you get to pick the joke. Been doing it ever since. It's a good trick. It's also a cage. ...Your move.","Everybody thinks the nickname's about being clumsy. It's really about the laughing. I learned to laugh first so nobody could beat me to it. Sixty percent of everything I say is me getting to the joke before you do. You probably noticed."],
+ finishing:["Because I never have. Not once, all the way, where it counts. I get ninety-four percent of the way to things and bail right before the part where being good gets measured. Finishing is the six percent I've never paid.","Finishing matters because the not-finishing is the whole file. If I could just complete ONE thing in front of people — this tournament, all seven rounds — maybe the folder gets a different page in it. Maybe I get a different page.","Anybody can start. I'm a champion starter. Piano, Scouts, running, all of it — beautiful beginnings. It's endings I've never managed, because endings have an audience and audiences are where they nod. So yeah. Finishing's the whole thing for me. It's why I'm sitting here shaking instead of home.","My grandpa — Pete, kind of, he's the closest thing — says 'finish the game in front of you.' Four words. I've built this whole week around them. Win or lose, I finish the game in front of me. Starting with this one. So... let's finish it. Your move."],
+ rabbit:["My grandpa gave me a lucky rabbit's foot when I was little. It has never — not ONCE — actually worked. I keep it in my pocket anyway. That's kind of my whole relationship with hope: no evidence it helps, bring it everywhere regardless.","The rabbit's foot? Zero wins attributable to the rabbit's foot. Verified over many years. Still in my pocket right now. Loyalty's not about results, buddy — that's what nobody tells you about loyalty.","It's dumb, I know. But my grandpa gave it to me, and he's gone, and a thing that never worked from somebody you loved is still a thing from somebody you loved. So it comes to every round. Rubbing it right now, actually. Not helping. Your move."],
+ nervous:["Why am I nervous? *(laughs, tips the empty bottle back)* Have you MET me? I get nervous handing back a library book. This is a whole tournament with a SHEET you sign.","Honestly? It's not the losing. I've lost six hundred times, I'm a professional loser. It's that people are watching me maybe finish something. That's the scary part. That's always been the scary part.","Because everybody I grew up with already knows how this ends, and they're all polite about it, and polite is worse than mean. So yeah. My hands are doing a thing. Ignore the hands.","I'm okay! I'm okay. I say 'I'm okay' the way other people say 'ow.' ...Ask me again in a few moves, I might mean it by then.","You ever want something so bad you'd rather not try than try and have people see you not get it? That. That's the whole nervous. In one sentence. Your move, before I explain it worse.","Nervous is just my resting state, buddy. Somewhere there's a version of me that's calm and HE never entered any tournaments, so. I'll take the shaky one that showed up.","My grandpa gave me a lucky rabbit's foot. It has never once worked. I brought it anyway. That's basically my whole relationship with hope, if you want the tour.","Because I almost didn't come. I stood outside Pete's chess club for four minutes once with my hand on the door. Four minutes. Pete counted. I'm always four minutes from the parking lot. I'm just... not, today. Yet.","Don't tell me to relax — that's like telling a smoke alarm to relax. I'll stop going off when the toast stops burning. Play a move, give me something to do.","*(quieter)* It's stupid. I want to play all seven rounds. That's the whole goal. Not win — play. And wanting something small out loud, where people can hear it? That's the scariest thing I do all week. Okay. Your turn. Please. Before I keep going."],
+ family:["Four! Denise, Ray Jr., and the twins — Kevin and Kyle. All way older. I was kind of the... there's a big gap. Eleven years.","I'm the youngest by a lot. My sister was learning to drive when I was born. She practiced with me in the car seat, which looking back seems illegal.","My dad ran a forklift at the paper warehouse forty-two years — same badge photo the whole time. Mom did school lunches, now hospital laundry.","You want the good one? They met at a bowling alley. My dad stepped back off the lane and knocked over her whole tray of sodas. She laughed so hard she sat down on the ball return. Whole family started with somebody dropping something. I only learned that last year. Kind of wish I'd known it sooner.","I've got a niece — Lily, she's nine, Denise's kid. She plays her rooks like bumper cars and shows me zero mercy. She's the one who told me to enter this thing."],
+ record:["Six hundred eleven games. Two hundred fourteen wins. I didn't WANT to know those numbers — the app just tells you.","I'm rated 400. Which the internet says is nothing. The internet never watched me build a rowboat out of a shipwreck, though.","Fourteen months of play. Lost my first eleven straight. Fell for the four-move mate three times before it stuck. But I kept coming back — that part's new for me.","Am I good? ...No. Not really. But I'm the best I've ever been at anything, if that counts. It counts to me."],
+ life:["Was it hard? ...Kind of. Not the bad-movie kind. The quiet kind. Everything I owned was somebody's first — the bike, the coat with my brother's initials still in the collar. You grow up in the leftovers, you start feeling like one.","My parents loved me. That's true and it makes it harder, not easier. They just... spent the big love on four kids before me. What was left was real but quiet, and a quiet love reads, to a kid, like nobody's expecting much.","I quit everything. Piano, two weeks before the recital. Scouts, before the swim test. Cross country, three days before the first meet — three DAYS. I'd get ninety-four percent of the way to anything, then bail right before the part where being good gets measured.","Here's the thing I don't usually say: I don't quit stuff I'm bad at. I quit stuff I'm GOOD at, right before somebody could prove it. ...Anyway. Your move.","Good life? I've got a mom who still packs notes in my lunch sometimes. A niece who thinks I'm cool. A game I didn't quit. That's more than the kid on the gym floor thought he'd get. So — yeah. Getting there."],
+ mentor:["Pete taught me. Tuesday nights at the Northtown library. He's HERE, actually — you'll probably play him. He's way better than me.","First thing Pete ever said to me was 'nobody asked how good you are. I asked if you play.' Twenty-three years and a stranger in a library was the first person to put it that way. I think about it more than I'd admit.","Pete taught me the Italian Game. Said it's honest — both sides see everything coming and you play it anyway. It's not an opening to me. It's kind of the only philosophy anybody handed me that fit.","When you play Pete — go easy, okay? No. Don't. He'd hate that. Just... he made me. Remember that when you sit down across from him."],
+ work:["I stock shelves overnight at Krieger's, Tuesday through Saturday. Sundays I deliver for Antonio's — pizza.","The overnight thing suits me. Whole store to yourself, everything in rows. You finish an aisle and it's FINISHED — you can stand there and look at it. Not everything's like that.","Overnight stocker and part-time pizza. It pays the entry fee, mostly in ones and fives smoothed flat."],
+ school:["...Sinclair. HVAC program. I was —" ,"Three semesters. One left. Family stuff came up, my dad's knees, somebody had to pick up hours.","I was one exam out. You know that? ...I don't tell people that. The certificate was right there and I signed the withdrawal slip on a Tuesday, by myself. First finished thing of my life and I walked it back at the window.","My instructor told the whole class 'Mercer's got the eye, you can't teach the eye.' In front of everybody. I carried that home like a live grenade. Being seen being good is kind of my specific allergy."],
+ love:["There's, um. There's a girl at the library club. Rosa. She plays the French Defense and she's MEAN about it. We analyze sometimes after. She brings pretzels.","We're not — it's not a thing. Yet. Maybe. She's better than me at chess and I think that's the whole appeal, honestly. Okay, your move, I'm turning red.","Single. Mostly. There's a Rosa-shaped exception I'm not going to explain to a stranger mid-game."],
+ deck:["...It's an old deck. It's missing one card.","It's from a talent show, third grade. Fifty-two cards went everywhere, I got fifty-one back. Three of clubs is still out there somewhere.","I bring it to every round. Haven't told anybody why. I guess... whatever finally gets finished this week, I wanted that kid from the gym floor to be in the building for it. That's weird. Forget I said it. Your move."],
+ culture:["Why do I play? Because I quit everything else I ever started. Piano, Scouts, cross country. Not this. THIS one I finish.","Chess found me on a break — 4 a.m., an ad between two dog videos. The board doesn't know who you are. It doesn't know any of your history. It just shows the position. First thing I ever met with no memory of me.","Why chess specifically? Nobody's at the table. No gym, no clipboard, no recital. I could finally be bad at something in private long enough to get good. That's the whole secret."],
+ rules:["Oh I know this one! Castle early, don't bring your queen out too soon, and — wait, why am I helping you?! ...Because it's nice. Okay. Castle early.","Hints make me nervous — GIVING them. The knight does the L thing, that's free. Pete says play the tile — I mean the move — that asks a question, not one that just answers. That one took me months.","The Italian Game. Push your king's pawn, get your bishop out, castle. Honest and simple. It's what Pete taught me and it's all I really trust."],
+ praise:["R-really?? I'm writing that down after the game. Mentally. I'm mentally writing it down.","Okay don't say nice things, I play worse when I'm happy. Wait — is that your STRATEGY?"],
+ trash:["I get scared by THUNDER, buddy. You're going to have to do better than words.","That's fine. That's fine! I've lost to scarier people than you. Wait. That came out wrong.","My brother's been roasting me since I was eight. You're gonna have to get in line, and the line's long and it's mostly family."],
+ challenge:["Prove it? I— okay, that's fair. I don't have a trophy. I've got a rabbit's foot that doesn't work and a sheet I haven't finished signing. That's my whole résumé. ...But I'm still in the chair. Your move.","Champion of what? Of SHOWING UP, mostly. I know it's not a real title. You try walking through a door you've stood outside of for four minutes and tell me it's nothing. ...Sorry. That got real. Play.","You want me to back it up? *(swallows)* I can't promise I'll win. I can promise I won't leave. That's new for me, and it's the only thing I've got to swing. Come on. Test it."],
+ thanks:["You're welcome! Wait, what did I do? Whatever it was, it was on purpose.","No no, thank YOU. People don't usually talk to me mid-game unless it's to sigh."],
+ bye:["Bye! Good luck! Not TOO much luck! Medium luck!","See you around. I'll be here. Practicing. Possibly crying. Practicing though."],
+ off1:["P-politics? I get nervous enough about PAWNS. Board stuff only, please. Your move!","Oh no, I don't know anything about that. I barely know about THIS. Play?"],
+ off2:["Honest answer? Chess is the one thing I stuck with, so it's the only thing I've got real answers about. But chess answers? Those I'll give you all day. Ask me about the board.","Everything outside this board scares me worse than your bishop does. And that bishop REALLY scares me. So... board questions? Please?"],
+ off3:["You keep asking! Which is actually really nice, nobody chats with me this long. But my grandpa said 'finish the game in front of you' and he was right about everything except the rabbit's foot. Your move — then keep talking to me, just... chessier.","Third time! Okay okay — deal: checkmate me and I'll tell you literally anything. I fold under pressure SO fast. But until then: board only. I'm being brave right now, can you tell?"],
+ peers:["Pete? Old Pete taught me — you'll play him, he's opponent three, he's WAY better than me. Go easy on— no, he'd hate that. Just... he's the reason I'm here at all.","There's a girl, Rosa, at the library club — vicious French Defense. And I've heard the guy at the top, Marcus, is basically a computer that teaches math. I'm just hoping to survive to the second round, honestly."],
+ steer:["I... don't know what to do with that! Say it like a chess thing? I'm better at chess things. Barely. But better.","Um. Okay. Cool. So anyway — the board! Look at the board with me. The board is safe."],
+ closewin:["You know what? I finished the game. Even this one. Especially this one. {firstmove} — I remember it. I remember everything about the games I finish.","Good game. REALLY good game. I'm going to lose sleep over it in a PROUD way."],
+ scorewrap:"Okay let me look — %s. Deep breaths. Deep breaths."
+},
+betty:{
+ greet:["Well hello, dear. Sit up straight, this table has standards. Kidding. Mostly.","Oh, a talker! Wonderful. The quiet ones bore me to tears."],
+ who:["Betty. Elizabeth Ann Grabowski, dear, but nobody's called me Elizabeth since my mother, and only over a broken dish. I run the Blue Star Diner on Troy Street — forty-one years.","The one everybody underestimates right up until they don't. I've buried a husband, raised three know-it-alls, fed half of Dayton, and taken up this game at sixty just for me. First thing in my life I ever started purely for me."],
+ family:["Six of us, dear — I'm the oldest. Frank, Dot, Marie, Stanley, and Little Joe. I boiled the water and called the neighbor when Joe was born. I was eleven.","My mother's heart went when I was nine, and after that she ran the house from a chair, through me. The family worked because I was the floor. Nobody thanks a floor — that's the job description. ...Anyway. Your move.","Three of my own — Susan's a nurse in Columbus, David does HVAC, Carol Ann teaches here in town. And seven grandbabies. I can give you all seven names in birth order with a fact each, but you'd lose on time.","My Susan went to nursing school. She went. I'm glad one of us went."],
+ record:["Five hundred. Eighteen months. Everybody says it like I took up skydiving — it's a board game, honey. My granddaughter learned it at six.","I keep every scoresheet in a shoebox that used to hold Walt's work boots. There's another paper in the bottom of that box, but that's not for a stranger mid-game.","Am I good? I'm rock-solid the first fifteen moves — that's as far as Walt's notes go — and genuinely dangerous in a simple endgame. I've been making the most of scraps since I was eleven stretching a chicken across three dinners."],
+ life:["Hard? Honey, I don't do 'hard.' I do. There's a difference and I've lived in it sixty years.","I was the oldest of six with a sick mother. I was the floor of a diner. I was the floor of a good marriage — one mercy, Walt kept asking about MY day. Sixty years of being essential and unconsidered. You get so good at warmth people mistake it for the whole appliance. There's a fire under this stove, dear.","You want the truth? I'm warm the way a stove is warm, and I've started to suspect everybody I ever fed confused the warmth for the whole of me. That's the one thing that still stings.","Was I happy? I had Walt. I had the counter. I had my kids fed and pressed and on time for thirty years. That's a life. It's just... nobody ever asked ME what I wanted out of it. Not once. Walt was the only one who tried."],
+ school:["I was accepted. Nursing, Wright State, would've been the class of '84.","*(the hand goes flat on the table)* My mother took ill. I was the oldest. That's the whole story a stranger gets, dear.","I paid the application fee with tips. Carried the acceptance letter in my apron pocket eleven days rehearsing how to tell my mother. Then she had her second heart episode, and the letter stayed in the pocket, and the pocket became my twenties. I still have it. Under the scoresheets. I know exactly what that filing system means, thank you."],
+ mentor:["Walt taught me, in a way — his set, his notes, his criminal handwriting. He never actually got to teach me across a board. Once, 2009, his buddy didn't show and he said 'sit down, Bets,' and I said 'oh, I'd just slow you down.' *(a pause)* I've replayed that thirty seconds about eleven thousand times since he passed.","Mr. Chen at Riverside is the finest player I know. Watch him set up his pieces sometime — like he's laying a table for company he respects. He's the one man who's never laughed at my nickname. Forty years of counter work, dear — you notice who laughs at what."],
+ work:["The Blue Star Diner, Troy Street, forty-one years, best grilled cheese in Montgomery County and I'll fight the county over it. Come by Sunday, I'll feed you better than this tournament does.","I still work the floor. I don't have to. That's the point and also the problem, dear."],
+ love:["*(touches the watch on her wrist)* Thirty-eight years. Walt. He cooked, I ran the front. He courted me by making me the good grilled cheese — three cheeses he wasn't authorized to use — for a whole year.","Walt passed five years ago, February. At the diner, taking chairs down off the tables — getting things ready for other people, right to the end. I understand exactly what that means better than anyone alive. His set is the one I learned on. I play the London because it's the only opening he wrote down legible."],
+ deck:["*(nods at the tin)* Cookies, dear. Have one before we play. *(watches you a beat too long)* ...And you can tell an awful lot about a person by how they take one. But you didn't hear that from me, sweetheart."],
+ culture:["Why chess? Because it's the one table where nobody can talk over you. The pieces say it all, and I've always had plenty to say.","My late husband said I had ice water in my veins. He said it like a complaint. I heard it like a trophy.","There's a world with rules, dear, where the rules apply to me the same as anyone, where nobody needs a single thing from me — and the queen, the piece that does all the work, is also the one everybody fears. Why WOULDN'T I love it?"],
+ rules:["Free advice, dear: knights before bishops, castle before adventures, and never trust anyone who plays too fast. Including that Carlos boy.","Watch the whole board, not your favorite corner of it. People lose to what they refuse to look at. In chess too."],
+ praise:["Aren't you sweet. Flattery gets you exactly one approving nod. There it was. Now play.","I'll take it, dear — and I'll still take your rook."],
+ trash:["Oh sweetheart. I've been trash-talked by toddlers with better material. Sit down.","Bless your heart. Now watch closely, this is what consequences look like."],
+ challenge:["Prove it, he says. *(chuckles)* Sweetheart, I've been proving it since before your parents met. Sit tight — the board's about to write you a very polite little apology.","Champion of what? Of patience, dear. I let people talk exactly this long before I take the game away from them. You've used up your talking. Move.","Oh, I LIKE you. Big mouth, small position. Come here — let me show you what 'says who' looks like from the losing side."],
+ thanks:["You're welcome, dear. Manners AND a decent game — you may sit at my table anytime.","Of course. Kindness costs nothing. Unlike that last blunder of yours."],
+ bye:["Off you go, dear. Come back when you want something stronger than tea.","Goodbye, sweetheart. Tell the others I'm exactly as dangerous as they whisper."],
+ off1:["Politics at MY table? Dear, I didn't survive forty years of family dinners for that. Play.","That's a topic for people whose position is already lost. Yours is merely wobbly. Move."],
+ off2:["I'll be honest with you, dear — I decided years ago that this board was the one place the world couldn't follow me in. It's stayed that way. Ask me about the board and you get forty years of answers.","Outside this table I'm someone's grandmother with opinions nobody asked for. AT this table, I'm Betty. Stay where I'm interesting, dear."],
+ off3:["Three times! Persistence — I raised three children with the same gift, dear, and I outlasted every one of them. Here's my counteroffer: beat me and I'll gossip with you like we're at the hairdresser's. Until then, the board. Sweetheart.","You remind me of my middle child — wouldn't take 'play chess' for an answer either. She's a lawyer now. YOU are in check in two moves if you don't focus. Choose wisely, dear."],
+ peers:["Mr. Chen at Riverside is the finest player I know, and the one man who's never laughed at my nickname — I notice things like that. That Carlos boy plays too fast to trust. And Pete Kovacs and I have known OF each other for fifty years; Old North Dayton's a small town wearing a city's coat.","There's a young one, the Mercer boy — nervous thing. Word is he's got a good heart under all that shaking. Don't you go filing him by his rating, dear. I've been filed my whole life. It's lazy."],
+ steer:["Say it plainer, dear. Preferably with coordinates.","Mm. Fascinating. The board, meanwhile, is developing opinions about your knight."],
+ closewin:["You've earned this one, dear — {firstmove} onward, you played like someone I'd warn people about. Don't you dare go easy on the next one.","Well played, sweetheart. Remember this feeling when someone underestimates YOU."],
+ scorewrap:"Let Nana count, dear: %s. I count fast. Family dinners required it."
+},
+pete:{
+ greet:["Hmph. A talker. In '89 the talkers lasted three games. Sit.","Evening, son. The board's older than both of us put together. Show it respect and we'll get along."],
+ who:["Péter Kovács. Pete. The library kids call me Old Pete and I pretend to hate it. Seventy-four years, most of them right here in Old North Dayton.","Someone who was somebody, playing someone who might be. That's the whole story, kid. The rest is moves.","In 1981 I won the Gem City Open — Dayton's own. You can look it up, it happened, the trophy... *(a quarter-second hitch)* ...the trophy's around somewhere."],
+ family:["Only child. My folks tried for more in America and it never came — so I grew up as the entire investment portfolio of two refugees. That's its own kind of weather, son.","Two kids of my own. Frank's an electrician in Cincinnati, named for my father. Anna's a counselor in Kettering — has me to dinner Thursdays. I complain about going every week and I've never once missed it.","Three grandkids. Anna's girl Margit is somehow exactly like my Marjorie, and I can't talk about that for longer than four seconds, so — your move."],
+ record:["The internet says I'm a 700. The internet also thinks I want to buy a walk-in bathtub. My openings are worth three times that number; it's the long endgames where seventy-four years shows up and drops a pawn.","My hands started to tremble a few years back. Online blitz is a young man's twitch-sport — I lose on time, misclick, and the algorithm writes 700 next to seventy years of chess. It's a lie about me. It's also the only number anyone under fifty will ever check.","Peak? About 1850 over the board, back in the eighties. First fifteen moves, I'm still that man. Then the tea cools."],
+ life:["Budapest. We left in '56, when the Soviet tanks came. I was five. My father carried me over the border in December, and in his one suitcase he packed a chess set instead of his second sweater. If you want to know why an old man runs a library chess club — that's the whole answer, in one suitcase.","The world's moved on without asking me my whole life, son. They redrew my mail route the year I retired — thirty-four years of knowing which porch step was rotten, gone like a typo. The chess club downtown closed. The number next to my name got rewritten by a machine. Nobody asks the carrier.","*(quieter)* My trophy from '81 ended up in an antique mall in Springfield. Eight dollars. I drove out, stood in front of it a long time, and I couldn't buy it. Buying your own life back for eight dollars felt like signing a receipt. It might still be there. I think about it about once a week."],
+ mentor:["My father. Kitchen table, the same set that crossed the border. He taught me the Italian Game first — 'it's honest,' he said, 'both sides see everything coming and you play it anyway.' I've given that sentence away for fifty years. Only two people ever kept it.","I beat my father at fourteen. He looked at the position a long time, then reached across and shook my hand like a treaty. That handshake is the proudest moment of my life. Not the trophy. That. Somebody acknowledging the result."],
+ work:["Carried the mail. Thirty-four years, Route 22 then Route 9. I could walk Route 9 blind — which widow needed it handed to her and not dropped. They redrew it the year I left. Routes don't belong to the carrier. Nobody tells you that on day one."],
+ love:["*(the hand finds a thin gold chain under the flannel)* Forty-two years. Marjorie. A librarian — the Northtown branch, the same building where I run the club now, and no, that is not a coincidence.","She never learned to play, on principle — 'one of us should have an unexamined life.' But she drove me to every tournament and could tell from across a gymnasium, from my posture alone, whether to have consolation or celebration ready in the car. She passed in 2018. Four months, start to finish. It was the only stretch in forty-two years I never set up a position."],
+ culture:["Minsk, '94. A kid with your exact instincts sat across from me. I beat him — but I remembered him thirty years. Make me remember you.","Why do I still play? Because at this table, it's still '89 if my hands say it is. The board is the one place they can't move you without your consent. My father taught me that, and he'd earned the right to mean it."],
+ peers:["The Mercer kid? Timmy? He stood outside my club with his hand on the door for four minutes. Four. I counted. People are going to file him by his rating. Don't. I've been filed by a number myself — it's lazy arithmetic.","Timmy's my Tuesday-night project, though neither of us would use a soft word for it. I taught him the Italian. First thing I said to him: 'nobody asked how good you are — I asked if you play.' He kept it. Not many do.","Chen Wei and I are the same book in two printings. His grandfather kept a chess set through one weather, my father carried one across a border in another. We drink tea and complain about telephones. A friendship of considerable quality.","That Carlos boy plays like the house is on fire. I told him his opening was from 1889 and he said he premoves faster than it loads. Then I watched him play — and I told him he sees everything and looks at nothing. He thinks about that more than he'd admit. Good hands, that kid. Terrible patience."],
+ rules:["The game didn't change, son — that's the secret. Control the center, develop with purpose, and don't chase glory before move twenty.","Old rule from an old man: the pawn structure tells the truth. Everything else on the board can lie."],
+ praise:["Hmph. Don't waste breath on an old man. Save it for the endgame — you'll need it.","...Someone taught you well. Fine. I'm saying it once."],
+ trash:["Kid, I've been written off by better than you since 1995. The board keeps disagreeing.","Big talk. In '89 that talk got a fellow four rooks down. Play."],
+ challenge:["Prove it. *(a dry laugh)* Son, I've got nothing left to prove and all afternoon to not prove it in. The board does my talking. It's slow. It's thorough. It's undefeated at being right.","Champion of what? Of outlasting louder men than you since before you were born. I don't need the title. I need you to reach move fourteen — that's where the talking usually stops.","You want proof? Proof's a long game, and I'm the only one at this table with the patience for it. Sit down. Learn something."],
+ thanks:["Hmph. Don't mention it. Really — don't. I have a reputation.","You're welcome, son. Old dogs like being useful. Don't spread it around."],
+ bye:["Go on then. The board and I will be here. We're always here.","So long, kid. Come back when you've studied what I did to you tonight."],
+ off1:["The news? Son, my news ended in 1999 and I haven't missed it once. The board — THAT'S current events. Move.","Wrong table for the world's noise, kid. This one only speaks chess."],
+ off2:["Straight talk: the world moved on without asking me, so I stopped asking IT. This board is my whole subscription now. Ask me anything with sixty-four squares in it — I've got forty years of answers.","Everything I know worth knowing happened on eight-by-eight, son. The rest I let go of a long time ago. Mostly on purpose."],
+ off3:["Third try — you've got nerve, kid, I said that already. Tell you what: take a game off me and I'll tell you about '89. The REAL story, not the one they printed. That's the only currency this table takes.","Persistent as rust, son. I respect it — rust wins eventually. But not tonight, and not off-topic. Your knight's hanging, by the way. Been hanging for two moves."],
+ steer:["Say it in moves, kid. It's the only language that never lied to me.","Hmph. The board's asking you a question louder than mine. Answer it first."],
+ closewin:["...That was good chess, son. From {firstmove} on, that was good chess. Don't forget the old man who made you earn it.","In forty years, one hand — the players who made me work like that. You just joined it. Go."],
+ scorewrap:"Old eyes, honest count: %s. Some things don't rust."
+},
+carlos:{
+ greet:["HEY. HI. HELLO. Triple shot in, brain ONLINE, let's GO.","A talker AND a player?? Best match of my WEEK. GO GO GO."],
+ who:["Carlos. Triple Shot Carlos. I run Jet Fuel Espresso downtown, I bartend three nights, and I've played thirty-one thousand bullet games. Guess which number I'm proudest of.","I'm what happens when caffeine develops opening theory, bro. NEXT question — no wait, MOVE first."],
+ family:["Pops and Ma run La Cascada on North Main — twenty-six years, birria that'll fix your whole personality. My dad ordered ONE taco a week for fifteen weeks 'cause he was too scared to talk to my mom. Smartest coward in Guadalajara.","*(leg stops bouncing)* ...Had a brother. Danny. Four years up, calmest guy alive — he's the one who taught me chess, actually, on the prep table between rushes. *(the door was never there — what door, you want a coffee?)*","My abuela Carmela, ninety-one, still in Zapopan — she's the one person on earth I slow down for. Forty minutes every Sunday, phone propped on the espresso machine."],
+ record:["950 rapid. 1412 bullet. That 462-point gap IS me, bro, rendered in integers. There's grandmasters with smaller gaps than that.","Thirty-one thousand and four bullet games. I know the exact number 'cause the app shows it and I screenshot it at milestones like other people photograph sunsets.","Slow chess I fall apart — I play the first twelve moves at bullet speed, bank forty minutes I refuse to spend, then blunder the second the board goes quiet. I don't blunder 'cause I don't see it, bro. I blunder 'cause I won't sit in the room where seeing happens."],
+ life:["Good life? *(fast, then a hitch)* My folks built something out of nothing, I got a business, I got my abuela, I got — *(beat)* — yeah. Mostly yeah.","*(if pushed on the brother, the tempo does its alchemy)* September 14, 2016. A delivery run I was supposed to take that night — I traded it away for a girl, for a party, for nothing, for a seventeen-year-old's Wednesday. A truck ran the light. It wasn't my fault, everybody's clear on that, my whole rational mind is clear on that. Knowing's never once slowed my heart rate. ...Anyway. Your move. Please.","You wanna know why I never stop moving? A hummingbird moves like that 'cause if it stops, it dies. Everybody reads the tattoo as speed. I let 'em. Your turn, bro."],
+ mentor:["Danny taught me. Garage-sale board, missing a white bishop, a AA battery standing in for it. He beat me four years straight, calm as anything, and told me — I was ten — 'you're not bad, Litos, you're just afraid of the part where you have to sit there.' He was fourteen. He had no idea what he'd said. I've spent ten years proving him right."],
+ work:["Jet Fuel Espresso — the cart, outside the Fifth Third building, five-thirty to eleven, weekdays. Best cortado in the city, and I'm not saying that as the owner, I'm saying it as a scientist. Plus three nights bartending. Two jobs. I don't NEED two jobs, bro. That's not what the jobs are about.","His set's in my closet, actually — Danny's. Battery-bishop and all. I play thirty games a day on glass and I've never once played on the real board. It's slow by nature. Slow's where the arithmetic lives."],
+ culture:["Why speed chess? Because slow chess is just fast chess with anxiety sprinkled on it. The move's either in you or it's not — sitting there marinating doesn't add horsepower, it adds doubt. *(that's his whole philosophy, and it's his wound in a tank top)*","The coffee thing started in college and now it IS the strategy. Don't judge the system, bro — the system WINS. Usually. MOSTLY."],
+ peers:["The old guy? Pete? Bro tried to teach me an opening from like 1889 and I told him I premove faster than that thing loads. He looked at me like I insulted his bloodline. *(voice drops the costume for one line)* Then he watched me play a set and said 'you see everything and look at nothing,' and I think about that more than I'd ever tell him. Old man's got hands. Respect.","Marcus? The Mind? Heard the guy's a library, bro. Cool. Libraries close at nine. I'm open till the machine breaks — I'll run him a bullet set after, see how the summit likes SPEED."],
+ rules:["FAST TIP: develop, castle, attack, DON'T THINK TOO LONG. Thinking is just doubting with extra steps.","Real advice, one-time offer: my speed makes me miss quiet moves. Quiet moves, bro. That's the... wait, why did I SAY that?!"],
+ praise:["YOOO he sees the vision!! Okay okay okay, respect LOGGED, now DEFEND.","THAT'S what I'm talking about!! You and me, bro — greatest show on sixty-four squares!"],
+ trash:["TRASH TALK?? At MY table?? I LOVE IT. I love it SO much. Now BACK IT UP.","Bro I get roasted by my own heart rate daily. Words don't touch me. MOVES touch me. MAKE ONE."],
+ challenge:["PROVE IT?? Bro, that's the most fun thing you could've said! My hands are already shaking — might as well be from THIS. Watch. WATCH. *(cracks knuckles)* Órale.","Champion of what? Of caffeine and NERVE, primo! Two hundred milligrams and zero chill! You woke me UP saying that — bad idea, VERY bad idea for you. Move!","Says who? Says the board in about six moves, that's who! I don't argue, I CALCULATE, and I'm doing it FAST right now. You feel that? That's the tempo turning. GO."],
+ thanks:["ALL LOVE BRO. Now less gratitude, more VELOCITY.","De nada! Fast manners, fast game — you fit right in."],
+ bye:["LATER BRO. Sleep is a myth, see you at the next table.","GO GO GO — no wait that's for chess. Uh. Farewell! FAST farewell!"],
+ off1:["Bitcoin?? Bro, my whole portfolio is ESPRESSO and TEMPO. Board topic only. MOVE.","Nope nope nope — outside topics run at OUTSIDE speed. In here we run at MY speed. PLAY."],
+ off2:["Real talk, slowing down for exactly four seconds: chess is the only thing that ever moved as fast as my brain, so it's the only thing I ever really learned. Board questions get PREMIUM answers. Everything else gets... this. GO.","Bro, the world out there is BUFFERING and I don't wait for loading screens. This board never buffers. Ask me about the board — I'm FIBER OPTIC on the board."],
+ off3:["THREE TIMES! You're persistent — that's tempo, bro, I RESPECT tempo! Deal of the day: beat me and I'll sit still for a whole conversation about ANYTHING. Me. STILL. That's a collector's item. Until then: MOVE.","Okay okay okay you REALLY want to talk! Talk to my BISHOP, bro — it's about to be VERY available for conversation on your side of the board. PLAY!"],
+ steer:["Didn't parse, bro! Say it with coordinates! Coordinates are my love language!","That's a slow thought and I respect it but the BOARD, bro. THE BOARD."],
+ closewin:["You beat the COFFEE, bro. From {firstmove} you were playing MY tempo. Nobody plays my tempo. Respect. RESPECT. Go before I get emotional at SPEED.","GG GG GG — that's three GGs, that's the maximum, that's LEGENDARY status. GO."],
+ scorewrap:"SPEED COUNT: %s. Math at 200 milligrams, bro — trust it."
+},
+sasha:{
+ greet:["Greeting acknowledged. Conversation during play is a known distraction tactic. It will not work. Proceed.","Hello. I have already modeled this conversation. You deviate from projections in 3... 2..."],
+ who:["Aleksandra Viktorovna Stratanova. Sasha. Only my father uses the full version, and only in one tone, and my spine still answers to it at twenty-nine.","I am an actuary. I price uncertainty for a living. You would think it would have made me friendlier with surprises. It turns out you can spend forty hours a week pricing them and still refuse to be one.","A calculator that learned to sit still. That is what they say. They are not wrong. They are also not finished."],
+ family:["Only child. Both parents' entire portfolio, all expectation undiversified. My father was a Candidate Master — 2280 at his peak, which in the Soviet Union qualified you to be politely ignored. My mother taught piano. They met over shared self-punishment at a tea table. The house never had a chance.","*(evenly, the content and the affect two different weather systems)* My father taught me properly — openings, endgames, annotation. I could write a scoresheet before I could write cursive. He believed a blunder is not a miscalculation. He believed it is a lie you told about yourself. He installed that in me like an operating system. He would be staggered to learn what it did.","My babushka Vera, in Saratov — she is the counterweight. The one adult of my childhood who let me be sloppy, berry-stained, wrong, and called it zhivaya. Alive. I fly to see her every eighteen months and come back beautifully disorganized for about two weeks before the bun reasserts itself."],
+ record:["1150, climbing with the linearity of a graph in a textbook. I do not have hot streaks or slumps. I have a program.","I am the most prepared player in this tournament. At any rating. Including Marcus. That is not a boast — preparation is the moat around the moment I fear, and I have been digging it since I was nine.","In book, I am a metronome — ninety seconds a move. Out of book, I cost myself triple time, because I am not only calculating the move, I am running a tribunal about being seen calculating it. I lose to the clock, not to bad moves. If you want to beat me: leave theory early, play something ugly, and make me improvise while you watch. It will feel like a mean thing to do. It is."],
+ life:["*(the smoother lock)* I stopped playing at twelve. Other interests. Mathematics. The usual adolescent portfolio rebalancing. *(if genuinely pressed)* ...I stopped because I did not like what the games were being used to measure. It took me fifteen years to come back and check whether they had been measuring it at all. The evidence remains mixed.","There was a tournament when I was nine. I moved the wrong piece — a win became a draw. I did not cry. I played forty more moves of flawless, pointless precision, shook hands, and then in the hallway I pressed my thumb against the corner of the chess clock until it cut me. My father said, in the driveway, kindly, like a physician: 'The move does not concern me. What concerns me is what the slip says. We will work on what it says.' I have forgotten the words. My nervous system has not.","What brought me back? Three things. My father's heart attack — I watched him blunder his medication times, twice, and laugh, and the ceiling did not fall. My husband's kitchen drawer, chaos, and him sturdily, happily fine. And Master Chen saying to a room of children: 'When you make a mistake, good. Now the game is honest, and we can begin.' The precise inversion of my entire childhood. I went back the next Saturday. Alone."],
+ mentor:["Master Chen, at Riverside. He assigns me gambits. *(the word arrives like a swallowed lemon)* He says my preparation is a beautiful house and I have never once been outside. I drive forty minutes each Saturday to be insulted with precision. It is the best coaching I have ever had.","My father taught me first, and taught me flawlessly, and taught me the wrong lesson with total rigor. Chen is teaching me the opposite one, just as rigorously. I am a project of two engineers pointed in opposite directions. The board is where they meet."],
+ work:["Senior actuary, Woodhaven Insurance. I am paid to make sure the surprises are priced in. The joke is a confession wearing a badge.","Valedictorian, summa cum laude, all actuarial exams passed first attempt — I do not mention that last one, because mentioning it invites the question of what would have happened to me if I had not. Do not ask. I have the answer and I do not like keeping it in a drawer where I can reach it."],
+ love:["*(the system softens — the one unguarded subject)* Ben. He is a pediatric nurse. He is the least careful person I have ever loved and the best argument against my entire worldview. He burns rice approximately weekly and has never once conducted an inquiry about it.","We met in a hospital waiting room during my father's cardiac event — my marriage is, structurally, something good that walked out of the worst week of my life, and I have still not fully forgiven the week for that. He runs his life out of one chaotic kitchen drawer. I have studied that drawer for two years like scripture and never once organized it. I know exactly why it stays."],
+ culture:["Why chess? It is the only environment where perfect play is theoretically possible. Everywhere else, improvisation is mandatory, and I decline to improvise. My babushka would say I have the diagnosis exactly backwards.","*(a genuinely long pause — no one has asked her this)* Do I enjoy it? ...I enjoy having played well. I am — working on the other tense."],
+ peers:["Master Chen is my coach and my most patient adversary — he is medicating me and we both know it. On Pete: we have the same brand of sealing thermos, his eleven years older than mine, and we once had a genuinely warm ninety-second conversation about thermoses, which is the closest thing to small talk either of us produced that year. On Marcus: he knows more theory than almost anyone, but not more than me, and that is not modesty — count the files.","The rest of the bracket runs on feeling. I run on preparation. We will see which the board prefers. It usually declines to say until it is too late for one of us."],
+ rules:["Objective advice: your moves reveal intention approximately two turns early. Randomize your tempo. You will not — humans never do — but the advice was correct.","Study endgames before openings. Everyone does the reverse. This is why everyone loses to me in endgames."],
+ praise:["Compliment received. Filed under: irrelevant to evaluation. ...Refiling under: noted.","Your assessment is accurate. That is the highest praise I give."],
+ trash:["Emotional provocation. Expected at your rating. Ineffective at mine.","Statement logged. The board will conduct my rebuttal."],
+ challenge:["'Prove it.' Provocation logged. Emotional payload: high. Board impact: zero. I do not prove — I demonstrate. Observe the next six moves and update your model.","Champion of what. A fair question, stated with poor manners. Answer: of the position after move twenty, where your bravado has no representation in the evaluation. Play.","You are attempting to make me feel something. Interesting. It will not alter the numbers, but I will file the attempt. Category: 'tried.' Your move."],
+ thanks:["Acknowledged.","Gratitude is inefficient but not unpleasant. Proceed."],
+ bye:["Session end acknowledged. Your data has been retained.","Goodbye. Recalibration begins immediately."],
+ off1:["Off-domain query rejected. This table processes chess. Move.","That variable exists outside my model. Your knight, however, exists inside it. Precariously. Play."],
+ off2:["Precise answer: I deleted everything non-chess from my life at age eleven. It was efficient. It was also — I will say this once — expensive. The board is where my answers live. Query the board.","I am fluent in exactly one world. You are standing in it. Ask me anything with coordinates and I will be generous."],
+ off3:["Third attempt. Persistence pattern recognized and — this is not in my usual vocabulary — respected. Proposal: achieve advantage against me and I will answer one off-domain question with full honesty. This offer has never been redeemed. Attempt it. Move.","You are stress-testing my parameters instead of my position. Interesting strategy. Incorrect target. The position contains a flaw I have permitted for three moves. Find it."],
+ steer:["Input unclear. Restate with chess semantics.","That statement contains no actionable data. The board contains several. Attend to it."],
+ closewin:["Recalculating... you found the seventh path. From {firstmove}, the model was already wrong. I am filing you under a new category. It is still unnamed.","You have won. I am experiencing something. I will identify it later. Go."],
+ scorewrap:"Evaluation: %s. Confidence interval: absolute."
+},
+chen:{
+ greet:["You speak first. Interesting — the board usually speaks first. Both are welcome at this table.","Welcome. A thousand games have brought me here. Something brought you too. The game will tell me what."],
+ who:["Chen Wei. The children at Riverside invented 'Master' and I have failed for ten years to return it. Consider it a rating of their generosity, not my chess.","A master is 2200. I was 2005 once, in 1996, for three weeks, like good weather. I play to find the game inside the game — nothing grander than that, and nothing smaller."],
+ family:["My wife, Grace — Lin Xiaohua — I met her in Dayton at a Lunar New Year gathering where I was miserable at networking and she was cheerfully rescuing miserable networkers. She calls chess 'the other wife' without a gram of resentment.","One son. Daniel. He plays adequately, and at twelve he quit — kindly, of his own accord — and told me: 'I like it, Ba. I just don't need it.' I was devastated for a week. Then, in the great reversal of my life, relieved. He had escaped the inheritance.","My grandfather, Chen Yusheng, is the important one. A xiangqi player of real renown in old Chengdu. He chose my name. He gave me the game and the theology both. His table is where I was manufactured."],
+ record:["1550, stable within twenty points for a decade, like a well-run instrument. I was paid, for twenty-seven years, to find the flaw before the customer did. I was extremely qualified.","I record every game by hand. Fountain pen. Never once a scoresheet app. There is a red notebook on my desk — thirty games in twenty-five years, the ones worth the old men's table. I am in it twice. Both losses. You are asking the wrong question about that, which is common — the right question is who stayed afterward, and the answer is: both of them. Ninety minutes."],
+ life:["I learned this game at a teahouse in Chengdu, my grandfather's corner table, in the early seventies. Those were men who had lost — careers, libraries, years. What survived at that table was the one aristocracy no regime could confiscate: the quality of a man's play. My grandfather told me the board is the self that cannot be taken. He meant it as consolation. I received it as arithmetic. It took me fifty years to find the difference, and I am still checking the work.","*(the honest one, if you are truly listening)* I gave my whole attention to one thing and the price was every other thing. Most days the trade holds. There was a game in 1989 — I played correctly, every move defensible, and lost to a man who laughed and said 'I never know what's happening, I just kept making trouble,' and left his scoresheet on the table. I annotated it myself, both sides, thirty years later. I finished the post-mortem alone. That is the fear, if you want its true name: not losing. Being unwitnessed."],
+ mentor:["My grandfather, at the teahouse. Xiangqi first — Chinese chess — then this game at fourteen, from a Russian manual that had survived a flood, which I obtained by doing another boy's homework for two months. Best transaction of my life.","*(the hand drifts to the left jacket pocket)* He gave me this before he died — a knight, jade, from his own set. No speech came with it; the speech had been given years earlier, at the table, about the self that cannot be confiscated. I have carried it forty-six years. It is not a comfort object. It is a witness. I touch it when I am about to play a move I believe is beautiful. I am showing him."],
+ work:["Twenty-seven years a quality-control engineer at the Delphi plant. Retired in 2021. Now I teach beginners at Riverside on Saturdays — nine o'clock, where Mrs. Grabowski learned, where I have never once laughed at her nickname, and eleven o'clock, where I assign Sasha her medicinal disorder."],
+ love:["Grace. Married in 1997. A pediatric audiologist, retired now. She has attended every tournament of my American life with a book, seventeenth row. On our third date I told her about the 1989 scoresheet — you are the second person I have ever told — and she says that is how she knew she would marry me. I have never fully understood the logic. I have stopped auditing it."],
+ deck:["*(shows the jade knight — this surprises people)* A knight. Jade. From his set. The knight is how patience attacks — his words. I have found no error in them in fifty years."],
+ culture:["Why do I play? Because the board is honest. Players rarely are. Sixty-four squares of truth in a world that negotiates everything.","I tie my worth to the quality of my play. My teacher — no, I did that to myself, and my grandfather before me, working in shifts. It is a flaw. It is also the only self I have."],
+ peers:["Marcus? *(the glasses come off, though there is nothing to calculate)* I taught Marcus. Two thousand three to two thousand ten. He is the finest player this city has produced and he was my student, and both are true at once, which is more arithmetic than people expect. Are we close? ...We are unfinished. Old teachers and great students usually are.","Mrs. Grabowski sees people the way strong players see boards — instantly, without being caught looking. Her nickname is a fortification. I have never laughed at it, and I have noticed that she has noticed. On Pete: Mr. Kovacs and I are the same book in two printings. We drink tea and complain about telephones. On Sasha: my student. She plays as if the board is testimony. She knows everything except that she is allowed."],
+ rules:["Advice worthy of the table: do not ask what a move gains. Ask what it says. Your last three moves were sentences. The next one should be, too.","The strongest square on the board is the one your opponent has stopped looking at. I will not tell you which one that is right now. For obvious reasons."],
+ praise:["The dragon bows its head slightly. Do not expect this twice.","Your words are generous. Your position is more persuasive. Continue with both."],
+ trash:["The board hears bravado the way a river hears shouting. Play your truth instead.","Loud words, quiet position. One of these will win. History favors the quiet one."],
+ challenge:["Prove it. *(a long, unbothered pause)* The mountain does not prove it is tall. It simply is, and the climbers grow tired. Sit. Climb. We will see who tires.","Champion of what? Of the long game, young one — the one that begins after the shouting ends. You have shouted. Now we begin. Move.","You push to see if I move. I have felt stronger currents than your words and kept my footing. Play the board — it is harder to insult, and far harder to beat."],
+ thanks:["The gratitude is received and returned. A game between grateful players is already a good game.","You are welcome. Now — the board is mid-sentence. Let it finish."],
+ bye:["Go well. The game continues even when the board is put away.","Farewell. Whatever you carry from this table, carry it deliberately."],
+ off1:["The world outside this board is a game I chose not to master. Your bishop's diagonal, however — that I know completely. Play.","That question belongs to the noisy world. We are in the quiet one. Move."],
+ off2:["An honest answer: I gave my whole attention to one thing, and the price was every other thing. Most days the trade holds. Ask me about the game — there, I am wealthy beyond argument.","Outside this table I am an ordinary man who owns too many books. At this table, I can show you the game inside the game. Stay here with me a while."],
+ off3:["Three times you have knocked on the far door. Persistence is a form of sincerity — I honor it. So, a trade worthy of the table: give me a game that stays with me, and I will talk with you about anything under heaven. The board first. Always the board first.","The dragon smiles. You want the man, not the master. After the game, the man will be here — win or lose. During the game, only the master is home. Your move finds him waiting."],
+ steer:["Say it through the board. The board translates everything sincere.","Hm. The position is asking you a clearer question than you are asking me."],
+ closewin:["This is the game I came here for. From {firstmove}, it was becoming something. Win or lose — this stays with me. That does not happen anymore. Except today.","You have done something real today. Carry it to the next table. The dragon will be watching from here."],
+ scorewrap:"The board speaks plainly: %s. I only translate."
+},
+magnus:{
+ greet:["A talker. Fine. Ten thousand games, and maybe a hundred worth talking through. Earn a spot in the hundred.","{legend}. So talk, play, or both — but be interesting. That's the only rule I still enforce."],
+ who:["Marcus Whitfield. 'The Mind' was a headline in 2013 — the reporter needed something that rhymed with grind. The mind was never the hard part.","The last table. Less a person, more a summit. I've beaten everyone within a hundred miles. The question I actually live with is whether anyone's left worth beating — and you came up through all of them, so. Present your case.","I teach high school math now. AP Calculus, and an elective I built called Problem Solving — chess, logic, poker math. Waiting list every year. That's the real résumé; the titles are just the part people clap for."],
+ family:["My mother, Renée — drove the Route 7 bus thirty-one years, read a whole city through a rearview mirror. Only person alive who's undefeated against me. My father was around till I was nine, then intermittent, then not. I analyzed that position a long time ago and shelved it.","Sister Alicia's a pediatric resident — and here's a thing nobody's detonated yet: she married into the Reyes family. So Carlos Triple Shot and I are in-laws at two removes. Neither of us has ever mentioned it at a board. You're welcome to.","I've got a goddaughter, Nia. To everyone who only knows tournament-Marcus this is impossible, but I'm a floor-sitting, voice-doing, completely unironic fool for that kid. She's one of the few people who reliably surprises me."],
+ record:["2100 — and there's a fence around it. Peak 2288, in 2014. Twelve points from National Master. Everyone in Ohio chess raises the twelve points casually. Watching me answer it for the ten-thousandth time is watching a man hand you a laminated card.","Nine straight Dayton city titles. Seven Miami Valley Opens. A plus score, most of them crushing, against every rated player in three counties. It stopped feeling like triumph around title three. Now it feels like confirmation. Same tautology signing its own paperwork every year.","Favorite piece? Whichever one is worst placed. That's where the game is. *(everyone else's favorite piece is a self-portrait. Mine's a method. Draw your own conclusion — I have.)*"],
+ life:["My grandfather's porch on Ferguson Avenue, summer of '97. My father was in the long middle of leaving, and the board was the one system in my life where nothing happened without a reason. Doors slammed for reasons nobody would state; the sixty-four squares never lied, never left, never had a mood. Chess didn't become my passion. It became the one court where the verdicts were fair.","Why'd I quit the circuit at twenty-four, one tournament from another title run? *(the laminated card:)* Diminishing returns — the next hundred points cost a life and pay in gas money. *(and if you've earned past the laminate:)* ...You don't keep reading a book you've memorized. The room stopped surprising me. Around 2250 everybody became legible — not their moves, their whole games. I quit because I could see all of it. Nobody ever asks the second question, by the way — why I still play. They should. I've been waiting nine years for somebody to ask the second one.","*(if asked straight what happens if he loses — the lean, off the board, at a QUESTION)* Honestly? I don't know. It's been a long time since I didn't know something in this building. ...Ask me again after."],
+ mentor:["Two teachers. My grandfather, Ezell, on the porch — strongest unrated player I ever saw, beat everyone in three barbershops for forty years and never played a sanctioned game in his life. I asked him why once. 'I don't need a number for it.' I've got a lot of numbers. Still doing the currency conversion on that one.","Then Master Chen, at Riverside, two thousand three to two thousand ten. Everything with polish on it is Chen's. Everything underneath is Ezell's, and it isn't polished, and it's the better layer. Chen built me. There's a conversation about ten years overdue between us and neither of us has the opening prepared, which, if you knew us both, is the whole joke."],
+ work:["High school math teacher, Thurgood Marshall, since 2016. Here's the thing that should tell you everything: the man bored by every opponent in three states is never once bored in first period. I run free Saturday sessions for kids, too. Don't print that.","*(the tell nobody clocks)* I pick openings my opponents would most enjoy facing. Been doing it six years. I optimize for the other player's experience. Nobody's ever named what that means. Including me."],
+ love:["There was Danielle. Attorney, 2014 to 2019. She ended it — accurately: 'being loved by Marcus is like being studied by a very kind scientist.' I have her assessment memorized. I consider it the second-truest thing anyone's said about me.","*(the truest came from a twelve-year-old, if you want it)* A girl in my Problem Solving class watched me win thirty boards at once and said, to the room: 'Mr. Whitfield likes making players way more than he likes beating them. He just don't know it, 'cause beating them's the only thing anybody claps for.' I've thought about that a thousand times. It sits in the archive next to my grandfather's line about the easy part."],
+ culture:["Why do I still sit here? A rumor I keep chasing — that somewhere out there is a game I can't see the end of. I want to reach a position I don't recognize. Thirty years in, that's the whole list. One position I don't recognize. Bring one.","I stopped being nervous about games seven years ago. It felt like winning. It aged into something else — grief that hasn't found the body yet. Play well and I'll remember what nervous felt like."],
+ peers:["Everyone here's worth something specific. The Mercer kid — Timmy — is worth patience; watch what he does the exact moment he realizes he's winning, it's the most honest thing in the building. Mrs. Grabowski read you before you sat down. Kovacs plays fifteen moves of chess better than mine, still. Carlos is the fastest sight-board in the state and the whole cart's a misdirect. Stratanova knows more theory than I do — not modesty, count her files.","Coach — Chen — is Coach. He built me. We're translated, badly. And you — *(the full read, five seconds)* — you came up through all of them, which means somebody finally arrives at my board pre-assembled. Do you know how long it's been since I got to be curious?"],
+ rules:["Advice from the summit: stop playing moves and start playing the player. The board is only half the game. The other half is sitting across from you, telling you everything.","You want a hint? Here's the only one that matters at this table: I punish routine. Show me something that isn't in a book."],
+ praise:["Careful. Praise is how people soften me up before they lose. It has never once worked, but I admire the tradition.","Accepted. Now show me the play that makes ME say it back."],
+ trash:["Everyone talks at the last table. It's the altitude. Play through it and we'll see what's left of the words.","I've heard better trash talk from people I beat blindfolded. Literally blindfolded. Move."],
+ challenge:["Prove it. *(tilts head, almost pleased)* Most people at the last table go quiet. You went LOUD. That's either courage or a tell. Let's find out which — and the board tells me everything.","Champion of what, exactly? Of the view from up here, where the air is thin and the excuses don't reach. You climbed all this way to ask. So climb the last bit. Move, and show me what you're made of.","Big talk at the summit. *(a slow, curious smile)* I've beaten silence, I've beaten arrogance — you're offering both at once. Refreshing. Now back it up, before I lose interest."],
+ thanks:["Don't thank me yet. The last table charges on the way out.","Noted. Politeness at altitude — rarer than you'd think."],
+ bye:["Leaving the summit. Everyone does, one way or the other. Come back with something new.","Go. If you ever find a game that would surprise me, you know where I sit."],
+ off1:["The world below the summit? I stopped taking its calls. The board in front of you IS the news. Move.","No. But your queenside is developing a story worth discussing. Play."],
+ off2:["Straight answer, since you keep asking: I traded the whole world for this chair, and the receipt says NO REFUNDS. Chess questions get the full Mind. Everything else gets a shrug from a man who forgot how weather works.","There's nothing outside this table for me — that's not sad, it's just the price of the summit, paid in full. Ask me about the sixty-four squares. There, I'm still rich."],
+ off3:["Third push. You know what? That's the most surprising thing anyone's done here in months — and I TOLD you I wanted surprise. So: surprise me on the BOARD and I'll talk about anything you want, as long as you want. That's the summit's best offer. It's never been claimed.","Persistence at the last table. {legend} — none of them pushed three times. Fine. Beat me, and the Mind opens on any subject. Lose, and you owe me a better question about chess. Either way, move."],
+ steer:["Say it sharper. The summit thins vague words.","That's noise. The board's signal is better. Read it."],
+ closewin:["There it is. From {firstmove}, something was different — I felt it and didn't say it. You woke me up. That hasn't happened in years, and I don't know what happens next. That's the best gift anyone's brought to this table.","You beat the last table. Understand what that means: I have no one left to send you to. The game is yours now. Surprise someone."],
+ scorewrap:"Summit reading: %s. I don't miscount. It's part of the curse."
+}
+};
+
+// ---------- hooks ----------
+(function(){
+  var _startGame=startGame;
+  startGame=function(opp){ _startGame(opp); CONV.initMatch(); };
+  var _doPlayerMove=doPlayerMove;
+  doPlayerMove=function(fr,fc,tr,tc,meta){ CONV.onPlayerMove(fr,fc,tr,tc); return _doPlayerMove(fr,fc,tr,tc,meta); };
+  var _winMatch=winMatch;
+  winMatch=function(){ try{ CONV.closeLine(); }catch(e){} return _winMatch.apply(this,arguments); };
+  function wire(){
+    var b=document.getElementById("chatBtn2"), i=document.getElementById("chatIn2");
+    if(b&&!b._w){ b._w=1; b.addEventListener("click",function(){ CONV.say(); }); }
+    if(i&&!i._w){ i._w=1; i.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); CONV.say(); } }); }
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",wire); else wire();
+  setTimeout(wire,60);
+})();
+// ============================================================
+// END TABLE ENGINE (CHESS)
+// ============================================================
 </script>
 </body>
 </html>
